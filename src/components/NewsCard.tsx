@@ -1,6 +1,6 @@
 import React from 'react';
 
-export interface NewsItem {
+export interface NewsData {
   id: string;
   title: string;
   summary: string;
@@ -10,7 +10,7 @@ export interface NewsItem {
   url: string;
 }
 
-const NewsCard: React.FC<{ item: NewsItem }> = ({ item }) => {
+const NewsCard: React.FC<{ item: NewsData }> = ({ item }) => {
   return (
     <div className="glass-card news-card">
       <div className="news-image" style={{ backgroundImage: `url(${item.imageUrl})` }}>

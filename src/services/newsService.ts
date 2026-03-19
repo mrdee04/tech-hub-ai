@@ -1,7 +1,7 @@
 import { supabase } from '../supabaseClient';
-import type { NewsItem } from '../components/NewsCard';
+import type { NewsData } from '../components/NewsCard';
 
-export const fetchNews = async (): Promise<NewsItem[]> => {
+export const fetchNews = async (): Promise<NewsData[]> => {
   const { data, error } = await supabase
     .from('news')
     .select('*')
@@ -20,10 +20,10 @@ export const fetchNews = async (): Promise<NewsItem[]> => {
     url: item.url,
     imageUrl: item.image_url,
     publishedAt: item.published_at
-  })) as NewsItem[];
+  })) as NewsData[];
 };
 
-export const addNews = async (news: Omit<NewsItem, 'id'>): Promise<NewsItem | null> => {
+export const addNews = async (news: Omit<NewsData, 'id'>): Promise<NewsData | null> => {
   const dbNews = {
     title: news.title,
     summary: news.summary,
@@ -52,5 +52,5 @@ export const addNews = async (news: Omit<NewsItem, 'id'>): Promise<NewsItem | nu
     url: data.url,
     imageUrl: data.image_url,
     publishedAt: data.published_at
-  } as NewsItem;
+  } as NewsData;
 };

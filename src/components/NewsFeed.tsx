@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import NewsCard from './NewsCard';
-import type { NewsItem } from './NewsCard';
+import type { NewsData } from './NewsCard';
 import { fetchNews } from '../services/newsService';
 
 const NewsFeed: React.FC = () => {
-  const [news, setNews] = useState<NewsItem[]>([]);
+  const [news, setNews] = useState<NewsData[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
