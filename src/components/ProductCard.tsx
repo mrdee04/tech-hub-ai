@@ -3,7 +3,7 @@ import React from 'react';
 export interface Product {
   id: string;
   name: string;
-  description: string;
+  description?: string;
   bottomPrice: string;
   shops: { name: string; url: string }[];
   rating: number;

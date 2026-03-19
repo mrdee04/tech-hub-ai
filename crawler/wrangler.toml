@@ -1,0 +1,12 @@
+name = "tech-hub-ai-crawler"
+main = "src/index.js"
+compatibility_date = "2024-03-19"
+
+[triggers]
+crons = ["0 */1 * * *"] # Runs every 1 hour
+
+[vars]
+# Add these via dashboard or wrangler secret:
+# SUPABASE_URL = "..."
+# SUPABASE_ANON_KEY = "..."
+# GEMINI_API_KEY = "..."
