@@ -10,14 +10,16 @@ export default async function handler(req: any, res: any) {
   try {
     const body = req.body;
     
-    // Đảm bảo tin nhắn tồn tại
-    if (!body || !body.message) {
-      return res.status(200).json({ status: 'Ignored: No message inside body' });
+    // Hỗ trợ cả tin nhắn từ Group/Private (body.message) và Kênh (body.channel_post)
+    const message = body.message || body.channel_post;
+    
+    if (!message) {
+      return res.status(200).json({ status: 'Ignored: No message or channel_post inside body' });
     }
 
-    const { message } = body;
     const text = message.text;
     const chatId = message.chat?.id;
+    const messageId = message.message_id;
 
     if (!text) {
       return res.status(200).json({ status: 'Ignored: Not a text message' });
