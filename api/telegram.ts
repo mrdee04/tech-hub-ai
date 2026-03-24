@@ -17,14 +17,29 @@ export default async function handler(req: any, res: any) {
       return res.status(200).json({ status: 'Ignored: No message or channel_post inside body' });
     }
 
-    const text = message.text;
+    // Lấy nội dung chữ: text (tin nhắn thường) hoặc caption (tin nhắn kèm ảnh)
+    const text = message.text || message.caption || "";
     const chatId = message.chat?.id;
     const messageId = message.message_id;
 
-    console.log(`Received message from ${chatId}: ${text}`);
+    // Lấy ảnh: Telegram gửi mảng photo, lấy cái cuối cùng là ảnh to nhất
+    let imageUrl = "";
+    if (message.photo && Array.isArray(message.photo) && message.photo.length > 0) {
+      const largestPhoto = message.photo[message.photo.length - 1];
+      // Chúng ta sẽ dùng API proxy để hiển thị ảnh này an toàn
+      imageUrl = `/api/telegram-image?file_id=${largestPhoto.file_id}`;
+    }
 
-    // Bảo mật: Nếu bạn muốn thiết lập chỉ nhận tin từ 1 group cụ thể, 
-    // hãy điền ID của group vào biến TELEGRAM_ADMIN_CHAT_ID trên Vercel.
+    // Trích xuất link: Ưu tiên link từ text hoặc caption
+    let link = "";
+    const urlMatch = text.match(/https?:\/\/[^\s]+/);
+    if (urlMatch) {
+      link = urlMatch[0].replace(/[).,]+$/, ""); // Làm sạch link
+    }
+
+    console.log(`Received message from ${chatId}: ${text.substring(0, 50)}... Image: ${!!imageUrl}, Link: ${link}`);
+
+    // Bảo mật: Admin Chat ID
     const adminChatId = process.env.TELEGRAM_ADMIN_CHAT_ID;
     if (adminChatId && adminChatId.trim() !== "" && String(chatId) !== String(adminChatId)) {
       console.log(`Ignored message from unauthorized chat: ${chatId}. Required: ${adminChatId}`);
@@ -65,8 +80,8 @@ export default async function handler(req: any, res: any) {
       id: `tg-${message.message_id}-${Date.now()}`,
       isActive: true,
       text: `${text}`, 
-      link: '',
-      imageUrl: ''
+      link: link, // Đã trích xuất link tự động
+      imageUrl: imageUrl // Trỏ về proxy api/telegram-image
     };
 
     // Chèn lên đầu danh sách, giữ tối đa 5 thông báo mới nhất để tránh nặng Web
