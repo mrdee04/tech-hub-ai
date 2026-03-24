@@ -44,7 +44,10 @@ const NotificationBanner: React.FC = () => {
       gap: '12px',
       cursor: currentBanner.link ? 'pointer' : 'default',
       flexWrap: 'wrap',
-      minHeight: '48px'
+      minHeight: '48px',
+      position: 'sticky',
+      top: '72px',
+      zIndex: 40
     }}>
       {currentBanner.imageUrl && (
         <img 
