@@ -21,16 +21,14 @@ export default async function handler(req: any, res: any) {
     const chatId = message.chat?.id;
     const messageId = message.message_id;
 
-    if (!text) {
-      return res.status(200).json({ status: 'Ignored: Not a text message' });
-    }
+    console.log(`Received message from ${chatId}: ${text}`);
 
     // Bảo mật: Nếu bạn muốn thiết lập chỉ nhận tin từ 1 group cụ thể, 
     // hãy điền ID của group vào biến TELEGRAM_ADMIN_CHAT_ID trên Vercel.
     const adminChatId = process.env.TELEGRAM_ADMIN_CHAT_ID;
-    if (adminChatId && String(chatId) !== String(adminChatId)) {
-      console.log(`Ignored message from unauthorized chat: ${chatId}`);
-      return res.status(200).json({ status: 'Ignored: Unauthorized chat' });
+    if (adminChatId && adminChatId.trim() !== "" && String(chatId) !== String(adminChatId)) {
+      console.log(`Ignored message from unauthorized chat: ${chatId}. Required: ${adminChatId}`);
+      return res.status(200).json({ status: 'Ignored: Unauthorized chat', yourChatId: chatId });
     }
 
     // Kết nối Supabase bằng quyền Service Role (Bypass RLS)
