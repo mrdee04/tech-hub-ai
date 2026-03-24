@@ -1,11 +1,16 @@
 import { supabase } from '../supabaseClient';
 import type { NewsData } from '../components/NewsCard';
 
-export const fetchNews = async (): Promise<NewsData[]> => {
-  const { data, error } = await supabase
+export const fetchNews = async (category: string = 'all'): Promise<NewsData[]> => {
+  let query = supabase
     .from('news')
-    .select('*')
-    .order('published_at', { ascending: false });
+    .select('*');
+
+  if (category !== 'all') {
+    query = query.eq('category', category);
+  }
+
+  const { data, error } = await query.order('published_at', { ascending: false });
 
   if (error) {
     console.error('Error fetching news:', error);

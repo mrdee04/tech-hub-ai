@@ -1,7 +1,8 @@
 const RSS_SOURCES = [
   { name: 'VnExpress Số hóa', url: 'https://vnexpress.net/rss/so-hoa.rss' },
   { name: 'VnExpress Khoa học', url: 'https://vnexpress.net/rss/khoa-hoc.rss' },
-  { name: 'ICTNews', url: 'https://ictnews.vietnamnet.vn/rss/suc-manh-so.rss' }
+  { name: 'GenK', url: 'https://genk.vn/rss.chn' },
+  { name: '24h Công nghệ', url: 'https://www.24h.com.vn/upload/rss/congnghethongtin.rss' }
 ];
 
 export default {
@@ -27,8 +28,8 @@ async function runCrawler(env) {
       // Manual RSS parsing using Regex (No dependencies!)
       const items = parseRSS(xmlData);
       
-      // Only process the 5 latest items
-      const latestItems = items.slice(0, 5);
+      // Only process the 10 latest items
+      const latestItems = items.slice(0, 10);
 
       for (const item of latestItems) {
         const url = item.link;
