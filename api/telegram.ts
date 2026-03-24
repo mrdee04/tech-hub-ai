@@ -54,7 +54,8 @@ export default async function handler(req: any, res: any) {
       return res.status(500).json({ error: 'Database fetch error' });
     }
 
-    let items = currentData?.value?.items || [];
+    const currentSettings = currentData?.value || {};
+    let items = currentSettings.items || [];
     if (!Array.isArray(items)) {
        items = [];
     }
@@ -72,7 +73,7 @@ export default async function handler(req: any, res: any) {
     items = [newItem, ...items].slice(0, 5);
 
     const newValue = {
-      enabled: true, // Ép bật hiển thị toàn hệ thống
+      enabled: currentSettings.enabled ?? true, // Giữ nguyên trạng thái cũ, không tự ý ghi đè thành true
       items: items
     };
 

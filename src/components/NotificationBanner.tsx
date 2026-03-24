@@ -10,6 +10,8 @@ const NotificationBanner: React.FC = () => {
       const data = await fetchGlobalBanner();
       if (data && data.enabled && data.items && data.items.length > 0) {
         setActiveItems(data.items.filter(item => item.isActive));
+      } else {
+        setActiveItems([]);
       }
     };
     getBanner();
