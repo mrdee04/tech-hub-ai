@@ -21,20 +21,27 @@ export default async function handler(req: any, res: any) {
 
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-  const { data, error } = await supabase
+  const { data: bannerData, error: bannerError } = await supabase
     .from('site_settings')
     .select('*')
     .eq('id', 'global_banner')
     .single();
 
-  if (error) {
-    return res.status(200).json({ error: error.message, envCheck });
+  const { data: logData } = await supabase
+    .from('site_settings')
+    .select('*')
+    .eq('id', 'webhook_log')
+    .single();
+
+  if (bannerError) {
+    return res.status(200).json({ error: bannerError.message, envCheck, webhook_log: logData?.value });
   }
 
   return res.status(200).json({
     message: "Đây là dữ liệu Banner hiện tại trong Database của bạn.",
     envCheck,
-    data: data.value,
-    updated_at: data.updated_at
+    data: bannerData.value,
+    updated_at: bannerData.updated_at,
+    webhook_log: logData?.value
   });
 }

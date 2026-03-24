@@ -78,17 +78,26 @@ export default async function handler(req: any, res: any) {
     };
 
     // Cập nhật lên Supabase
-    const { error: updateError } = await supabase
-      .from('site_settings')
-      .upsert({ id: 'global_banner', value: newValue, updated_at: new Date().toISOString() });
+    // Cập nhật Banner chính
+    await supabase.from('site_settings').upsert({ 
+      id: 'global_banner', 
+      value: newValue, 
+      updated_at: new Date().toISOString() 
+    });
 
-    if (updateError) {
-      console.error("Error updating settings:", updateError);
-      return res.status(500).json({ error: 'Database update error' });
-    }
+    // Ghi log vào Database để debug (Lưu lại thông tin request cuối cùng)
+    await supabase.from('site_settings').upsert({
+      id: 'webhook_log',
+      value: {
+        last_chat_id: chatId,
+        last_text: text,
+        timestamp: new Date().toISOString(),
+        full_body: body
+      }
+    });
 
-    // Trả về 200 để Telegram biết là đã nhận thành công (nếu không Bot sẽ gửi lại liên tục)
-    return res.status(200).json({ success: true, message: 'Banner updated on TechHub!' });
+    // Trả về 200 để Telegram biết là đã nhận thành công
+    return res.status(200).json({ success: true, message: 'Banner updated on TechHub!', chatId });
     
   } catch (error: any) {
     console.error('Webhook error:', error);
