@@ -8,6 +8,7 @@ import { fetchAllUsers, fetchAllReviews, updateReview, deleteReview, updateUser,
 import { fetchReviewers, addReviewer, updateReviewer, deleteReviewer, type Reviewer } from '../services/reviewerService';
 import { supabase } from '../supabaseClient';
 import { CATEGORIES } from './CategoryTabs';
+import { fetchAllReportsForAdmin, updateReportStatus, type BottomPriceReport } from '../services/bottomPriceService';
 
 const AdminPanel: React.FC = () => {
   const [session, setSession] = useState<any>(null);
@@ -15,7 +16,7 @@ const AdminPanel: React.FC = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<'dashboard'|'products'|'reviewers'|'salePosts'|'users'|'settings'>('products');
+  const [activeTab, setActiveTab] = useState<'dashboard'|'products'|'reviewers'|'salePosts'|'users'|'settings'|'reports'>('products');
 
   // Data states
   const [products, setProducts] = useState<Product[]>([]);
@@ -23,6 +24,7 @@ const AdminPanel: React.FC = () => {
   const [reviews, setReviews] = useState<ReviewWithProduct[]>([]);
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [reviewers, setReviewers] = useState<Reviewer[]>([]);
+  const [bottomPriceReports, setBottomPriceReports] = useState<BottomPriceReport[]>([]);
 
   // Editing states
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -77,7 +79,8 @@ const AdminPanel: React.FC = () => {
       loadReviews(),
       loadUsers(),
       loadReviewers(),
-      loadSettings()
+      loadSettings(),
+      loadReports()
     ]);
     setLoading(false);
   };
@@ -118,6 +121,11 @@ const AdminPanel: React.FC = () => {
     } catch (e) {
       console.error('Failed to load settings:', e);
     }
+  };
+  
+  const loadReports = async () => {
+    const data = await fetchAllReportsForAdmin();
+    setBottomPriceReports(data);
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -354,6 +362,7 @@ const AdminPanel: React.FC = () => {
           <button className={`btn ${activeTab === 'reviewers' ? 'btn-primary' : ''}`} style={{ textAlign: 'left', background: activeTab === 'reviewers' ? '' : 'transparent' }} onClick={() => { setActiveTab('reviewers'); setSelectedProductForReviews(null); }}>⭐ Reviewers ({reviewers.length})</button>
           <button className={`btn ${activeTab === 'salePosts' ? 'btn-primary' : ''}`} style={{ textAlign: 'left', background: activeTab === 'salePosts' ? '' : 'transparent' }} onClick={() => { setActiveTab('salePosts'); setSelectedProductForReviews(null); }}>🔥 Tin Săn Sale ({salePosts.length})</button>
           <button className={`btn ${activeTab === 'users' ? 'btn-primary' : ''}`} style={{ textAlign: 'left', background: activeTab === 'users' ? '' : 'transparent' }} onClick={() => { setActiveTab('users'); setSelectedProductForReviews(null); }}>👥 Thành viên ({users.length})</button>
+          <button className={`btn ${activeTab === 'reports' ? 'btn-primary' : ''}`} style={{ textAlign: 'left', background: activeTab === 'reports' ? '' : 'transparent' }} onClick={() => { setActiveTab('reports'); setSelectedProductForReviews(null); }}>🚩 Báo giá đáy ({bottomPriceReports.filter(r => r.status === 'pending').length})</button>
           <div style={{ height: '1px', background: 'var(--border-subtle)', margin: '8px 0' }}></div>
           <button className={`btn ${activeTab === 'settings' ? 'btn-primary' : ''}`} style={{ textAlign: 'left', background: activeTab === 'settings' ? '' : 'transparent' }} onClick={() => { setActiveTab('settings'); setSelectedProductForReviews(null); }}>⚙️ Thông báo Kèo Mới</button>
         </div>
@@ -529,7 +538,134 @@ const AdminPanel: React.FC = () => {
                     <input placeholder="Đáy vương" value={editingProduct.dayVuong || ''} onChange={e => setEditingProduct({...editingProduct, dayVuong: e.target.value})} className="input-field" />
                     <input placeholder="Nền tảng giá đáy" value={editingProduct.bottomPricePlatform || ''} onChange={e => setEditingProduct({...editingProduct, bottomPricePlatform: e.target.value})} className="input-field" />
                   </div>
-                  <div className="flex-center" style={{ justifyContent: 'flex-start', gap: '8px' }}>
+
+                  {/* VARIANT MANAGEMENT */}
+                  <div className="glass-card" style={{ background: 'rgba(255,255,255,0.02)', marginTop: '16px' }}>
+                    <h5 style={{ marginBottom: '16px' }}>⚙️ Quản lý Phân loại (Variants)</h5>
+                    <div className="flex-column gap-3">
+                      {/* Attributes list */}
+                      {(editingProduct.variants?.attributes || []).map((attr, attrIdx) => (
+                        <div key={attrIdx} className="glass-card" style={{ padding: '16px', background: 'rgba(255,255,255,0.03)' }}>
+                          <div className="flex-between mb-2">
+                            <input 
+                              value={attr.name} 
+                              onChange={e => {
+                                const newAttrs = [...(editingProduct.variants?.attributes || [])];
+                                newAttrs[attrIdx].name = e.target.value;
+                                setEditingProduct({...editingProduct, variants: { ...editingProduct.variants!, attributes: newAttrs }});
+                              }}
+                              className="input-field"
+                              placeholder="Tên phân loại (VD: Màu sắc)"
+                              style={{ fontWeight: 'bold' }}
+                            />
+                            <button type="button" className="delete-btn" style={{ padding: '4px 8px' }} onClick={() => {
+                              const newAttrs = (editingProduct.variants?.attributes || []).filter((_, i) => i !== attrIdx);
+                              setEditingProduct({...editingProduct, variants: { ...editingProduct.variants!, attributes: newAttrs }});
+                            }}>Xóa loại</button>
+                          </div>
+                          <div className="flex-center" style={{ flexWrap: 'wrap', gap: '8px', justifyContent: 'flex-start' }}>
+                            {attr.options.map((opt, optIdx) => (
+                              <div key={optIdx} className="badge badge-neutral" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <input 
+                                  value={opt} 
+                                  onChange={e => {
+                                    const newAttrs = [...(editingProduct.variants?.attributes || [])];
+                                    newAttrs[attrIdx].options[optIdx] = e.target.value;
+                                    setEditingProduct({...editingProduct, variants: { ...editingProduct.variants!, attributes: newAttrs }});
+                                  }}
+                                  style={{ background: 'transparent', border: 'none', color: 'inherit', outline: 'none', width: '80px' }}
+                                />
+                                <span style={{ cursor: 'pointer', opacity: 0.6 }} onClick={() => {
+                                  const newAttrs = [...(editingProduct.variants?.attributes || [])];
+                                  newAttrs[attrIdx].options = newAttrs[attrIdx].options.filter((_, i) => i !== optIdx);
+                                  setEditingProduct({...editingProduct, variants: { ...editingProduct.variants!, attributes: newAttrs }});
+                                }}>×</span>
+                              </div>
+                            ))}
+                            <button type="button" className="btn" style={{ padding: '2px 8px' }} onClick={() => {
+                              const newAttrs = [...(editingProduct.variants?.attributes || [])];
+                              newAttrs[attrIdx].options.push('Mới');
+                              setEditingProduct({...editingProduct, variants: { ...editingProduct.variants!, attributes: newAttrs }});
+                            }}>+ Thêm lựa chọn</button>
+                          </div>
+                        </div>
+                      ))}
+                      <button type="button" className="btn" style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', alignSelf: 'flex-start' }} onClick={() => {
+                        const currentVariants = editingProduct.variants || { attributes: [], variantPrices: [] };
+                        setEditingProduct({...editingProduct, variants: { ...currentVariants, attributes: [...currentVariants.attributes, { name: 'Loại mới', options: [] }] }});
+                      }}>+ Thêm tiêu chí phân loại mới</button>
+
+                      {/* Variant Prices Table */}
+                      {(editingProduct.variants?.attributes?.length || 0) > 0 && (
+                        <div style={{ marginTop: '24px' }}>
+                          <h6 style={{ marginBottom: '8px' }}>📍 Giá đáy theo từng phiên bản</h6>
+                          <div className="admin-table-container">
+                             <table className="admin-table">
+                               <thead>
+                                 <tr>
+                                   <th>Phiên bản</th>
+                                   <th>Giá đáy (đ)</th>
+                                   <th>Trạng thái</th>
+                                 </tr>
+                               </thead>
+                               <tbody>
+                                 {(editingProduct.variants?.variantPrices || []).map((vp, vpIdx) => (
+                                   <tr key={vpIdx}>
+                                     <td>
+                                       {Object.entries(vp.combination).map(([k, v]) => `${k}: ${v}`).join(' | ')}
+                                     </td>
+                                     <td>
+                                       <input 
+                                         type="number"
+                                         value={vp.bottomPrice || ''}
+                                         onChange={e => {
+                                           const newPrices = [...(editingProduct.variants?.variantPrices || [])];
+                                           newPrices[vpIdx].bottomPrice = parseInt(e.target.value);
+                                           setEditingProduct({...editingProduct, variants: { ...editingProduct.variants!, variantPrices: newPrices }});
+                                         }}
+                                         className="input-field"
+                                         style={{ width: '120px' }}
+                                       />
+                                     </td>
+                                     <td>
+                                        <button type="button" className="delete-btn" onClick={() => {
+                                          const newPrices = (editingProduct.variants?.variantPrices || []).filter((_, i) => i !== vpIdx);
+                                          setEditingProduct({...editingProduct, variants: { ...editingProduct.variants!, variantPrices: newPrices }});
+                                        }}>Gỡ</button>
+                                     </td>
+                                   </tr>
+                                 ))}
+                               </tbody>
+                             </table>
+                             <div className="mt-3 p-3 bg-deep rounded flex-column gap-2" style={{ background: 'var(--bg-deep)', borderRadius: '8px' }}>
+                                <strong>Thêm giá cho phiên bản:</strong>
+                                <div className="flex-center gap-2" style={{ justifyContent: 'flex-start', flexWrap: 'wrap' }}>
+                                  {(editingProduct.variants?.attributes || []).map((attr, i) => (
+                                    <select key={i} id={`new-vp-opt-${i}`} className="input-field" style={{ width: 'auto' }}>
+                                      {attr.options.map((o, j) => <option key={j} value={o}>{o}</option>)}
+                                    </select>
+                                  ))}
+                                  <input id="new-vp-price" type="number" placeholder="Giá..." className="input-field" style={{ width: '120px' }} />
+                                  <button type="button" className="btn-primary" onClick={() => {
+                                    const comb: Record<string, string> = {};
+                                    (editingProduct.variants?.attributes || []).forEach((attr, i) => {
+                                      const el = document.getElementById(`new-vp-opt-${i}`) as HTMLSelectElement;
+                                      comb[attr.name] = el.value;
+                                    });
+                                    const pr = document.getElementById('new-vp-price') as HTMLInputElement;
+                                    const newPrices = [...(editingProduct.variants?.variantPrices || []), { combination: comb, bottomPrice: parseInt(pr.value), isVerified: true }];
+                                    setEditingProduct({...editingProduct, variants: { ...editingProduct.variants!, variantPrices: newPrices }});
+                                    pr.value = '';
+                                  }}>Thêm giá</button>
+                                </div>
+                             </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex-center" style={{ justifyContent: 'flex-start', gap: '8px', marginTop: '16px' }}>
                     <button type="submit" className="btn-primary">Lưu thay đổi</button>
                     <button type="button" className="btn" onClick={() => setEditingProduct(null)}>Hủy</button>
                   </div>
@@ -701,7 +837,7 @@ const AdminPanel: React.FC = () => {
                       <div style={{ marginTop: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
                         Mức giá mục tiêu: <strong style={{ color: 'var(--accent-yellow)' }}>{post.target_price.toLocaleString('vi-VN')} đ</strong>
                       </div>
-                      {post.content && <p style={{ fontSize: '0.9rem', marginTop: '8px', color: 'var(--text-muted)' }}>"{post.content}"</p>}
+                      {(post as any).content && <p style={{ fontSize: '0.9rem', marginTop: '8px', color: 'var(--text-muted)' }}>"{(post as any).content}"</p>}
                       
                       <div className="mt-2 text-muted" style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                         Trạng thái: 
@@ -935,6 +1071,80 @@ const AdminPanel: React.FC = () => {
                     )}
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* REPORTS TAB */}
+        {activeTab === 'reports' && (
+          <div>
+            <div className="flex-between mb-4">
+              <h2>Báo giá đáy từ thành viên</h2>
+              <button className="btn" onClick={loadReports}>🔄 Làm mới</button>
+            </div>
+            
+            <div className="glass-card">
+              <div className="admin-table-container">
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Thành viên</th>
+                      <th>Sản phẩm & Phân loại</th>
+                      <th>Giá báo cáo</th>
+                      <th>Minh chứng</th>
+                      <th>Trạng thái</th>
+                      <th style={{ textAlign: 'right' }}>Hành động</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {bottomPriceReports.map(report => (
+                      <tr key={report.id}>
+                        <td>{report.profiles?.full_name}</td>
+                        <td>
+                          <div style={{ fontWeight: 600 }}>{report.products?.name}</div>
+                          <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                            {Object.entries(report.variant_combination).map(([k,v]) => `${k}: ${v}`).join(' | ')}
+                          </div>
+                        </td>
+                        <td style={{ color: 'var(--accent-green)', fontWeight: 700 }}>{report.reported_price.toLocaleString('vi-VN')} đ</td>
+                        <td>
+                          {report.screenshot_url ? (
+                            <a href={report.screenshot_url} target="_blank" rel="noreferrer" style={{ color: 'var(--accent-blue)', textDecoration: 'underline' }}>Xem ảnh</a>
+                          ) : 'Không có'}
+                        </td>
+                        <td>
+                          <span className="badge" style={{ 
+                            background: report.status === 'pending' ? 'rgba(234, 179, 8, 0.1)' : report.status === 'approved' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                            color: report.status === 'pending' ? '#eab308' : report.status === 'approved' ? '#22c55e' : '#ef4444'
+                          }}>
+                            {report.status === 'pending' ? 'Chờ duyệt' : report.status === 'approved' ? 'Đã duyệt' : 'Từ chối'}
+                          </span>
+                        </td>
+                        <td style={{ textAlign: 'right' }}>
+                          {report.status === 'pending' && (
+                            <div className="flex-center gap-2" style={{ justifyContent: 'flex-end' }}>
+                              <button className="btn-primary" style={{ padding: '4px 12px', fontSize: '0.85rem', background: 'var(--accent-green)', color: 'white', border: 'none' }} onClick={async () => {
+                                if (!window.confirm('Duyệt giá đáy này?')) return;
+                                const success = await updateReportStatus(report.id, 'approved');
+                                if (success) {
+                                  alert('Đã duyệt!');
+                                  loadReports();
+                                }
+                              }}>Duyệt</button>
+                              <button className="delete-btn" style={{ padding: '4px 12px', fontSize: '0.85rem' }} onClick={async () => {
+                                if (!window.confirm('Từ chối báo cáo này?')) return;
+                                const success = await updateReportStatus(report.id, 'rejected');
+                                if (success) loadReports();
+                              }}>Từ chối</button>
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                    {bottomPriceReports.length === 0 && <tr><td colSpan={6} className="text-center p-4 text-muted">Chưa có báo cáo nào</td></tr>}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>

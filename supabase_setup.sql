@@ -41,6 +41,8 @@ create table if not exists public.profiles (
   reputation_score numeric default 0,
   review_count int default 0,
   contact_info text,
+  telegram_username text,
+  telegram_chat_id text,
   role text default 'user',
   created_at timestamp with time zone default now()
 );
@@ -49,6 +51,8 @@ alter table public.profiles add column if not exists avatar_url text;
 alter table public.profiles add column if not exists reputation_score numeric default 0;
 alter table public.profiles add column if not exists review_count int default 0;
 alter table public.profiles add column if not exists contact_info text;
+alter table public.profiles add column if not exists telegram_username text;
+alter table public.profiles add column if not exists telegram_chat_id text;
 alter table public.profiles add column if not exists role text default 'user';
 alter table public.profiles add column if not exists created_at timestamp with time zone default now();
 
@@ -67,6 +71,7 @@ create table if not exists public.products (
   bottom_price_platform text,
   bottom_price_link text,
   day_vuong text,
+  variants jsonb default '{"attributes": [], "variantPrices": []}'::jsonb,
   created_at timestamp with time zone default now()
 );
 alter table public.products add column if not exists name text;
@@ -81,6 +86,7 @@ alter table public.products add column if not exists bottom_price_time text;
 alter table public.products add column if not exists bottom_price_platform text;
 alter table public.products add column if not exists bottom_price_link text;
 alter table public.products add column if not exists day_vuong text;
+alter table public.products add column if not exists variants jsonb default '{"attributes": [], "variantPrices": []}'::jsonb;
 alter table public.products add column if not exists created_at timestamp with time zone default now();
 
 -- c. Bảng Reviewers (Đánh giá viên)
@@ -220,6 +226,20 @@ create table if not exists public.site_settings (
 );
 alter table public.site_settings add column if not exists value jsonb;
 
+-- k. Bảng Bottom Price Reports (Báo cáo giá đáy từ người dùng)
+create table if not exists public.bottom_price_reports (
+  id uuid primary key default uuid_generate_v4(),
+  product_id uuid references public.products(id) on delete cascade,
+  user_id uuid references public.profiles(id) on delete cascade,
+  variant_combination jsonb not null, -- e.g. {"Màu sắc": "Xanh", "Dung lượng": "128GB"}
+  reported_price numeric not null,
+  screenshot_url text,
+  shopping_time timestamp with time zone,
+  status text default 'pending' check (status in ('pending', 'approved', 'rejected')),
+  created_at timestamp with time zone default now()
+);
+
+
 
 -- --------------------------------------------------------
 -- 3. Kích hoạt Row Level Security (RLS)
@@ -234,6 +254,8 @@ alter table public.sale_post_responses enable row level security;
 alter table public.reputation_reviews enable row level security;
 alter table public.comments enable row level security;
 alter table public.site_settings enable row level security;
+alter table public.bottom_price_reports enable row level security;
+
 
 -- --------------------------------------------------------
 -- 4. RLS Policies (Phân quyền truy cập)
@@ -349,6 +371,17 @@ create policy "Allow public read on site settings" on public.site_settings for s
 drop policy if exists "Admin can manage site settings" on public.site_settings;
 create policy "Admin can manage site settings" on public.site_settings for all using (public.is_admin());
 
+-- Policies cho Bottom Price Reports
+drop policy if exists "Allow public read on reports" on public.bottom_price_reports;
+create policy "Allow public read on reports" on public.bottom_price_reports for select using (true);
+
+drop policy if exists "Authenticated users can submit reports" on public.bottom_price_reports;
+create policy "Authenticated users can submit reports" on public.bottom_price_reports for insert with check (auth.uid() is not null);
+
+drop policy if exists "Admin can manage all reports" on public.bottom_price_reports;
+create policy "Admin can manage all reports" on public.bottom_price_reports for all using (public.is_admin());
+
+
 -- (Replaced by the chunk above)
 -- --------------------------------------------------------
 -- 5. Trigger Tự động Thêm User vào Profiles
@@ -360,7 +393,7 @@ begin
   insert into public.profiles (id, full_name, avatar_url, role)
   values (
     new.id,
-    new.raw_user_meta_data->>'full_name',
+    coalesce(new.raw_user_meta_data->>'full_name', 'Thành viên TechHub'),
     new.raw_user_meta_data->>'avatar_url',
     coalesce(new.raw_user_meta_data->>'role', 'user')
   );

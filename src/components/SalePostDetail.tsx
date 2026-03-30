@@ -100,14 +100,25 @@ const SalePostDetail: React.FC = () => {
             <div className="flex-column gap-4">
               <h3 style={{fontSize: '1.2rem', color: 'var(--text-secondary)'}}>Thông số yêu cầu</h3>
               <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 16}}>
-                <div style={{background: 'var(--bg-card)', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)'}}>
-                   <div className="text-muted mb-2" style={{fontSize: '0.85rem'}}>🎨 Màu sắc</div>
-                   <div style={{fontWeight: 500, fontSize: '1.1rem'}}>{post.details.color || 'Tùy ý'}</div>
-                </div>
-                <div style={{background: 'var(--bg-card)', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)'}}>
-                   <div className="text-muted mb-2" style={{fontSize: '0.85rem'}}>💾 Cấu hình</div>
-                   <div style={{fontWeight: 500, fontSize: '1.1rem'}}>{post.details.ram}/{post.details.storage}</div>
-                </div>
+                {post.details?.variant_combination && Object.keys(post.details.variant_combination).length > 0 ? (
+                  Object.entries(post.details.variant_combination as Record<string, string>).map(([name, value]) => (
+                    <div key={name} style={{background: 'var(--bg-card)', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)'}}>
+                       <div className="text-muted mb-2" style={{fontSize: '0.85rem'}}>⚙️ {name}</div>
+                       <div style={{fontWeight: 600, fontSize: '1.1rem'}}>{value}</div>
+                    </div>
+                  ))
+                ) : (
+                  <>
+                    <div style={{background: 'var(--bg-card)', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)'}}>
+                       <div className="text-muted mb-2" style={{fontSize: '0.85rem'}}>🎨 Màu sắc</div>
+                       <div style={{fontWeight: 500, fontSize: '1.1rem'}}>{post.details.color || 'Tùy ý'}</div>
+                    </div>
+                    <div style={{background: 'var(--bg-card)', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)'}}>
+                       <div className="text-muted mb-2" style={{fontSize: '0.85rem'}}>💾 Cấu hình</div>
+                       <div style={{fontWeight: 500, fontSize: '1.1rem'}}>{post.details.ram || ''}/{post.details.storage || ''}</div>
+                    </div>
+                  </>
+                )}
                 <div style={{background: 'var(--bg-card)', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)'}}>
                    <div className="text-muted mb-2" style={{fontSize: '0.85rem'}}>🛒 Sàn/Shop</div>
                    <div style={{fontWeight: 500, fontSize: '1.1rem'}}>{post.details.platform} - {post.details.shop || 'Bất kỳ'}</div>
@@ -133,6 +144,9 @@ const SalePostDetail: React.FC = () => {
                 <div style={{background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)', padding: '16px 20px', borderRadius: 'var(--radius-md)', marginTop: '8px'}}>
                    <label className="text-muted" style={{fontSize: '0.85rem', display: 'block', marginBottom: '8px'}}>Thông tin liên hệ trực tiếp:</label>
                    <p style={{color: 'var(--accent-green)', fontWeight: 600, fontSize: '1.1rem', margin: 0}}>{post.profiles?.contact_info}</p>
+                   {post.profiles?.telegram_username && (
+                     <p style={{color: 'var(--accent-blue)', fontWeight: 600, fontSize: '1.0rem', marginTop: '4px'}}>✈️ Telegram: {post.profiles.telegram_username}</p>
+                   )}
                 </div>
               )}
             </div>
@@ -202,7 +216,10 @@ const SalePostDetail: React.FC = () => {
                     <button onClick={() => handleAcceptBid(res.id)} className="btn btn-primary">Bắt tay ngay 🤝</button>
                   )}
                   {res.status === 'accepted' && (
-                    <div className="badge badge-offer" style={{padding: '8px 16px', fontSize: '0.9rem'}}>✓ Đã bắt tay • LH: {res.profiles.contact_info}</div>
+                    <div className="badge badge-offer" style={{padding: '8px 16px', fontSize: '0.9rem', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '4px'}}>
+                      <div>✓ Đã bắt tay • LH: {res.profiles.contact_info}</div>
+                      {res.profiles.telegram_username && <div style={{fontSize: '0.85rem', opacity: 0.9}}>✈️ TG: {res.profiles.telegram_username}</div>}
+                    </div>
                   )}
                 </div>
               </div>

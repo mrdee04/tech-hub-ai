@@ -73,7 +73,12 @@ const SalePostCard: React.FC<{ post: SalePost; onClick: () => void }> = ({ post,
       
       <div className="flex-center" style={{justifyContent: 'flex-start', gap: 8, flexWrap: 'wrap'}}>
         <span className="badge badge-neutral">📍 {post.details.platform}</span>
-        {post.details.color && <span className="badge badge-neutral">🎨 {post.details.color}</span>}
+        {post.details?.variant_combination && Object.entries(post.details.variant_combination as Record<string, string>).map(([name, value]) => (
+          <span key={name} className="badge badge-neutral" style={{borderColor: 'var(--accent-blue)', color: 'var(--accent-blue)'}}>
+            {value}
+          </span>
+        ))}
+        {!post.details?.variant_combination && post.details.color && <span className="badge badge-neutral">🎨 {post.details.color}</span>}
       </div>
 
       <div className="post-card-author">

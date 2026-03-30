@@ -9,6 +9,8 @@ const AuthPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [contactInfo, setContactInfo] = useState('');
+  const [telegramUsername, setTelegramUsername] = useState('');
+
   const navigate = useNavigate();
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -31,6 +33,7 @@ const AuthPage: React.FC = () => {
               id: data.user.id,
               full_name: fullName,
               contact_info: contactInfo,
+              telegram_username: telegramUsername,
             }]);
           
           if (profileError) console.error('Error creating profile:', profileError);
@@ -81,6 +84,14 @@ const AuthPage: React.FC = () => {
                 <label htmlFor="contact" className="premium-label">Thông tin liên hệ</label>
                 <input id="contact" className="premium-input" placeholder="VD: Zalo 0987..." value={contactInfo} onChange={e => setContactInfo(e.target.value)} required />
               </div>
+              <div className="input-group" style={{margin: 0}}>
+                <label htmlFor="telegram" className="premium-label">Tên người dùng Telegram</label>
+                <input id="telegram" className="premium-input" placeholder="VD: @username" value={telegramUsername} onChange={e => setTelegramUsername(e.target.value)} required />
+                <p className="text-secondary" style={{fontSize: '0.8rem', marginTop: 4}}>
+                  💡 Cách lấy: Vào Telegram -&gt; Settings -&gt; Edit Profile -&gt; Username.
+                </p>
+              </div>
+
             </div>
           )}
 

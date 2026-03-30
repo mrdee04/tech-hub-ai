@@ -1,5 +1,5 @@
 import { supabase } from '../supabaseClient';
-import type { Product } from '../components/ProductCard';
+import type { Product, ProductVariants } from '../components/ProductCard';
 import { fetchCommentsCountForProducts } from './commentService';
 import { fetchSalePostsCountForProducts } from './saleHuntingService';
 
@@ -162,7 +162,8 @@ export const fetchProducts = async (category: string = 'all'): Promise<Product[]
       bottomPriceTime: item.bottom_price_time || MOCK_JOURNEYS[item.name]?.bottomPriceTime,
       bottomPricePlatform: item.bottom_price_platform || MOCK_JOURNEYS[item.name]?.bottomPricePlatform,
       bottomPriceLink: item.bottom_price_link || MOCK_JOURNEYS[item.name]?.bottomPriceLink,
-      dayVuong: item.day_vuong || MOCK_JOURNEYS[item.name]?.day_vuong
+      dayVuong: item.day_vuong || MOCK_JOURNEYS[item.name]?.day_vuong,
+      variants: item.variants
     };
   }) as Product[];
 };
@@ -179,7 +180,8 @@ export const addProduct = async (product: Omit<Product, 'id' | 'reviewCount'>): 
     bottom_price_time: product.bottomPriceTime,
     bottom_price_platform: product.bottomPricePlatform,
     bottom_price_link: product.bottomPriceLink,
-    day_vuong: product.dayVuong
+    day_vuong: product.dayVuong,
+    variants: product.variants
   };
 
   const { data, error } = await supabase
@@ -205,7 +207,8 @@ export const addProduct = async (product: Omit<Product, 'id' | 'reviewCount'>): 
     bottomPriceTime: data.bottom_price_time,
     bottomPricePlatform: data.bottom_price_platform,
     bottomPriceLink: data.bottom_price_link,
-    dayVuong: data.day_vuong
+    dayVuong: data.day_vuong,
+    variants: data.variants
   } as Product;
 };
 
@@ -222,6 +225,7 @@ export const updateProduct = async (id: string, updates: Partial<Product>): Prom
   if (updates.bottomPriceLink !== undefined) dbUpdates.bottom_price_link = updates.bottomPriceLink;
   if (updates.dayVuong !== undefined) dbUpdates.day_vuong = updates.dayVuong;
   if (updates.category !== undefined) dbUpdates.category = updates.category;
+  if (updates.variants !== undefined) dbUpdates.variants = updates.variants;
 
   const { error } = await supabase
     .from('products')
@@ -272,7 +276,8 @@ export const fetchProductById = async (id: string): Promise<Product | null> => {
     bottomPriceTime: data.bottom_price_time || MOCK_JOURNEYS[data.name]?.bottomPriceTime,
     bottomPricePlatform: data.bottom_price_platform || MOCK_JOURNEYS[data.name]?.bottomPricePlatform,
     bottomPriceLink: data.bottom_price_link || MOCK_JOURNEYS[data.name]?.bottomPriceLink,
-    dayVuong: data.day_vuong || MOCK_JOURNEYS[data.name]?.day_vuong
+    dayVuong: data.day_vuong || MOCK_JOURNEYS[data.name]?.day_vuong,
+    variants: data.variants
   } as Product;
 };
 

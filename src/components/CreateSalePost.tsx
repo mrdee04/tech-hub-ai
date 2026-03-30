@@ -51,10 +51,25 @@ const CreateSalePost: React.FC = () => {
     storage: '',
     platform: 'Shopee',
     shop: '',
-    customName: ''
+    customName: '',
+    variant_combination: {} as Record<string, string>
   });
   const [targetPrice, setTargetPrice] = useState('');
   const [availablePlatforms, setAvailablePlatforms] = useState<string[]>(['Shopee', 'Lazada', 'Tiki', 'TikTok Shop', 'Khác']);
+
+  // Handle auto-populating variants when a product is selected
+  useEffect(() => {
+    if (selectedProduct?.variants?.attributes) {
+      const initialComb: Record<string, string> = {};
+      selectedProduct.variants.attributes.forEach(attr => {
+        if (attr.options.length > 0) initialComb[attr.name] = attr.options[0];
+      });
+      setDetails(prev => ({ ...prev, variant_combination: initialComb }));
+    } else {
+      setDetails(prev => ({ ...prev, variant_combination: {} }));
+    }
+  }, [selectedProduct]);
+
 
   useEffect(() => {
     if (selectedProduct) {
@@ -109,7 +124,8 @@ const CreateSalePost: React.FC = () => {
           ram: details.ram,
           storage: details.storage,
           platform: details.platform,
-          shop: details.shop
+          shop: details.shop,
+          variant_combination: details.variant_combination
         },
         target_price: Number(targetPrice),
         status: 'open' as const
@@ -244,16 +260,78 @@ const CreateSalePost: React.FC = () => {
               </div>
             </div>
 
-            <div className="form-row">
-              <div className="input-group">
-                <label className="premium-label">Màu sắc</label>
-                <input placeholder="VD: Titan" value={details.color} className="premium-input" onChange={e => setDetails({...details, color: e.target.value})} />
+            {selectedProduct && selectedProduct.variants?.attributes && selectedProduct.variants.attributes.length > 0 ? (
+              <div className="glass-card" style={{ padding: '20px', background: 'var(--bg-hover)', marginBottom: '24px' }}>
+                <h4 style={{ marginBottom: '16px', fontSize: '1rem' }}>⚙️ Chọn Phiên bản (Variants)</h4>
+                <div className="flex-column gap-4">
+                  {selectedProduct.variants.attributes.map(attr => (
+                    <div key={attr.name} className="flex-column gap-2">
+                      <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{attr.name}</span>
+                      <div className="flex-center" style={{ gap: '8px', justifyContent: 'flex-start', flexWrap: 'wrap' }}>
+                        {attr.options.map(opt => (
+                          <button
+                            key={opt}
+                            type="button"
+                            onClick={() => setDetails({ 
+                              ...details, 
+                              variant_combination: { ...details.variant_combination, [attr.name]: opt } 
+                            })}
+                            className={`chip ${details.variant_combination[attr.name] === opt ? 'active' : ''}`}
+                            style={{ 
+                              padding: '6px 16px', 
+                              borderRadius: '8px',
+                              border: '1px solid',
+                              borderColor: details.variant_combination[attr.name] === opt ? 'var(--accent-blue)' : 'var(--border-subtle)',
+                              background: details.variant_combination[attr.name] === opt ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
+                              color: details.variant_combination[attr.name] === opt ? 'var(--accent-blue)' : 'var(--text-secondary)',
+                              cursor: 'pointer',
+                              fontWeight: details.variant_combination[attr.name] === opt ? 600 : 400
+                            }}
+                          >
+                            {opt}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {/* Show variant-specific price if found */}
+                  {(() => {
+                    const found = selectedProduct.variants?.variantPrices.find(vp => 
+                      Object.entries(details.variant_combination).every(([k, v]) => vp.combination[k] === v)
+                    );
+                    if (found && found.bottomPrice) {
+                      return (
+                        <div style={{ marginTop: '8px', padding: '12px', background: 'rgba(16, 185, 129, 0.05)', borderRadius: '8px', border: '1px solid rgba(16, 185, 129, 0.1)' }}>
+                          <span style={{ color: 'var(--accent-green)', fontWeight: 600 }}>🎯 Giá đáy phiên bản này: {found.bottomPrice.toLocaleString('vi-VN')} đ</span>
+                          <button 
+                            type="button" 
+                            className="btn-ghost" 
+                            style={{ marginLeft: '12px', fontSize: '0.8rem', padding: '2px 8px' }}
+                            onClick={() => setTargetPrice(found.bottomPrice!.toString())}
+                          >
+                            Áp dụng giá này
+                          </button>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
+                </div>
               </div>
-              <div className="input-group">
-                <label className="premium-label">Cấu hình (RAM/ROM)</label>
-                <input placeholder="VD: 8/256GB" value={details.ram} className="premium-input" onChange={e => setDetails({...details, ram: e.target.value})} />
+            ) : (
+              <div className="form-row">
+                <div className="input-group">
+                  <label className="premium-label">Màu sắc</label>
+                  <input placeholder="VD: Titan" value={details.color} className="premium-input" onChange={e => setDetails({...details, color: e.target.value})} />
+                </div>
+                <div className="input-group">
+                  <label className="premium-label">Cấu hình (RAM/ROM)</label>
+                  <input placeholder="VD: 8/256GB" value={details.ram} className="premium-input" onChange={e => setDetails({...details, ram: e.target.value})} />
+                </div>
               </div>
-            </div>
+            )}
+
 
             <div className="terms-section" style={{background: 'var(--bg-hover)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border-subtle)', marginTop: '24px', marginBottom: '24px'}}>
               <h4 style={{marginBottom: '12px', color: 'var(--text-primary)', fontSize: '1.05rem'}}>Quy định Đăng tin ({type === 'request' ? 'Nhờ Săn' : type === 'offer' ? 'Đi Săn' : 'Pass Kèo'})</h4>
