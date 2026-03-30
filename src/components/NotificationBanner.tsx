@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { fetchGlobalBanner, type BannerItem } from '../services/settingsService';
+import { useLocation } from 'react-router-dom';
 
 const NotificationBanner: React.FC = () => {
   const [activeItems, setActiveItems] = useState<BannerItem[]>([]);
@@ -51,7 +52,11 @@ const NotificationBanner: React.FC = () => {
     }
   };
 
-  if (activeItems.length === 0) return null;
+  const location = useLocation();
+
+  if (activeItems.length === 0 || location.pathname.startsWith('/admin')) {
+    return null;
+  }
 
   const currentBanner = activeItems[currentIndex];
 

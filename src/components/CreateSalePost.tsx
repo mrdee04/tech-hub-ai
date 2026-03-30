@@ -23,21 +23,21 @@ const CreateSalePost: React.FC = () => {
     switch(type) {
       case 'request':
         return (
-          <ul style={{fontSize: '0.9rem', color: 'var(--text-secondary)', paddingLeft: '20px', marginBottom: '16px'}}>
+          <ul className="rules-list">
             <li>Bài đăng "Nhờ Săn Hộ" không có giá trị giao dịch, chỉ nhằm mục đích nhờ cộng đồng tìm kiếm giá tốt.</li>
             <li>Sau khi có người "Đi Săn Hộ" cung cấp link thành công, bạn có quyền tự quyết định mua hoặc không mua.</li>
           </ul>
         );
       case 'offer':
         return (
-          <ul style={{fontSize: '0.9rem', color: 'var(--text-secondary)', paddingLeft: '20px', marginBottom: '16px'}}>
+          <ul className="rules-list">
             <li>Bài đăng "Đi Săn Hộ" yêu cầu người đăng chia sẻ Link / Mã giảm giá minh bạch.</li>
             <li>Nghiêm cấm chia sẻ link lừa đảo, vi rút hoặc mã giảm giá giả mạo. Vi phạm sẽ bị khóa tài khoản vĩnh viễn.</li>
           </ul>
         );
       case 'pass':
         return (
-          <ul style={{fontSize: '0.9rem', color: 'var(--text-secondary)', paddingLeft: '20px', marginBottom: '16px'}}>
+          <ul className="rules-list">
             <li>Người đăng "Pass Kèo Thơm" phải chịu trách nhiệm về tình trạng nhượng lại đơn hàng hoặc pass đồ cũ.</li>
             <li>Nền tảng không chịu trách nhiệm trong vấn đề thanh toán. Khuyến khích giao dịch trực tiếp hoặc COD để đảm bảo an toàn.</li>
           </ul>
@@ -151,9 +151,9 @@ const CreateSalePost: React.FC = () => {
 
   if (!user) {
     return (
-      <div className="container-width flex-center" style={{minHeight: '60vh'}}>
-        <div className="premium-card text-center flex-column flex-center gap-4" style={{maxWidth: 400}}>
-          <h2 style={{fontSize: '1.5rem'}}>Chưa Đăng Nhập</h2>
+      <div className="container-width flex-center min-h-60">
+        <div className="premium-card text-center flex-column flex-center gap-4 max-w-400">
+          <h2 className="text-xl">Chưa Đăng Nhập</h2>
           <p className="text-secondary">Vui lòng đăng nhập để đăng tin săn sale cùng cộng đồng.</p>
           <button onClick={() => navigate('/auth')} className="btn btn-primary w-full mt-2">Đăng Nhập Ngay</button>
         </div>
@@ -166,14 +166,14 @@ const CreateSalePost: React.FC = () => {
       <div className="create-post-layout">
         <div className="premium-card">
           <div className="mb-6">
-            <h2 className="text-gradient" style={{fontSize: '2rem', marginBottom: 8}}>🎯 Đăng Tin Săn Sale</h2>
+            <h2 className="text-gradient mb-2 text-2xl">🎯 Đăng Tin Săn Sale</h2>
             <p className="text-secondary">Chia sẻ hoặc tìm kiếm những kèo thơm nhất cùng cộng đồng.</p>
           </div>
 
           <form onSubmit={handleSubmit} className="product-form">
             <div className="input-group">
               <label className="premium-label">Bạn muốn làm gì?</label>
-              <div className="pill-tabs" style={{width: 'fit-content'}}>
+              <div className="pill-tabs w-fit">
                 <button type="button" className={`pill-tab ${type === 'request' ? 'active' : ''}`} onClick={() => setType('request')}>Nhờ Săn Hộ</button>
                 <button type="button" className={`pill-tab ${type === 'offer' ? 'active' : ''}`} onClick={() => setType('offer')}>Đi Săn Hộ</button>
                 <button type="button" className={`pill-tab ${type === 'pass' ? 'active' : ''}`} onClick={() => setType('pass')}>Pass Kèo Thơm</button>
@@ -182,17 +182,18 @@ const CreateSalePost: React.FC = () => {
 
             <div className="input-group">
               <label className="premium-label">Sản phẩm mục tiêu</label>
-              <div style={{position: 'relative'}}>
+              <div className="relative">
                 <input 
+                  title="Tìm sản phẩm"
                   placeholder="Nhập tên sản phẩm (VD: iPhone 15...)" 
                   value={searchTerm} 
                   className="premium-input"
                   onChange={e => setSearchTerm(e.target.value)} 
                 />
                 {products.length > 0 && !selectedProduct && (
-                  <div style={{position: 'absolute', top: '100%', left: 0, width: '100%', zIndex: 50, background: 'var(--bg-deep)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', padding: 8, marginTop: 4, maxHeight: 200, overflowY: 'auto' }}>
+                  <div className="search-dropdown">
                     {products.map(p => (
-                      <div key={p.id} style={{padding: '10px 16px', borderRadius: 'var(--radius-sm)', cursor: 'pointer', borderBottom: '1px solid var(--border-subtle)'}} onClick={() => {
+                      <div key={p.id} className="search-item" onClick={() => {
                         setSelectedProduct(p);
                         setSearchTerm(p.name);
                         setProducts([]);
@@ -204,9 +205,9 @@ const CreateSalePost: React.FC = () => {
                 )}
               </div>
               {selectedProduct && (
-                <div className="flex-between mt-2" style={{background: 'var(--bg-hover)', padding: '8px 16px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-focus)'}}>
-                  <span className="text-secondary" style={{fontSize: '0.9rem'}}>Đã chọn: <strong className="text-primary">{selectedProduct.name}</strong></span>
-                  <button type="button" className="btn btn-ghost" style={{padding: '4px 8px', fontSize: '0.8rem'}} onClick={() => {
+                <div className="selected-product-info mt-2">
+                  <span className="text-secondary text-sm">Đã chọn: <strong className="text-primary">{selectedProduct.name}</strong></span>
+                  <button type="button" className="btn btn-ghost btn-sm" onClick={() => {
                     setSelectedProduct(null);
                     setSearchTerm('');
                   }}>Thay đổi</button>
@@ -218,6 +219,7 @@ const CreateSalePost: React.FC = () => {
               <div className="input-group">
                 <label className="premium-label">Tên sản phẩm tự nhập</label>
                 <input 
+                  title="Tên sản phẩm tự nhập"
                   placeholder="Nếu không tìm thấy sản phẩm, hãy tự nhập..." 
                   value={details.customName} 
                   className="premium-input"
@@ -237,6 +239,7 @@ const CreateSalePost: React.FC = () => {
               <div className="input-group">
                 <label className="premium-label">Giá mong muốn (VNĐ)</label>
                 <input 
+                  title="Giá mong muốn"
                   type="number" 
                   placeholder="VD: 15000000" 
                   value={targetPrice} 
@@ -261,13 +264,13 @@ const CreateSalePost: React.FC = () => {
             </div>
 
             {selectedProduct && selectedProduct.variants?.attributes && selectedProduct.variants.attributes.length > 0 ? (
-              <div className="glass-card" style={{ padding: '20px', background: 'var(--bg-hover)', marginBottom: '24px' }}>
-                <h4 style={{ marginBottom: '16px', fontSize: '1rem' }}>⚙️ Chọn Phiên bản (Variants)</h4>
+              <div className="glass-card p-4 bg-deep mb-6">
+                <h4 className="mb-4 text-base">⚙️ Chọn Phiên bản (Variants)</h4>
                 <div className="flex-column gap-4">
                   {selectedProduct.variants.attributes.map(attr => (
                     <div key={attr.name} className="flex-column gap-2">
-                      <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{attr.name}</span>
-                      <div className="flex-center" style={{ gap: '8px', justifyContent: 'flex-start', flexWrap: 'wrap' }}>
+                      <span className="text-sm text-secondary">{attr.name}</span>
+                      <div className="flex-center gap-2 justify-start flex-wrap">
                         {attr.options.map(opt => (
                           <button
                             key={opt}
@@ -276,17 +279,7 @@ const CreateSalePost: React.FC = () => {
                               ...details, 
                               variant_combination: { ...details.variant_combination, [attr.name]: opt } 
                             })}
-                            className={`chip ${details.variant_combination[attr.name] === opt ? 'active' : ''}`}
-                            style={{ 
-                              padding: '6px 16px', 
-                              borderRadius: '8px',
-                              border: '1px solid',
-                              borderColor: details.variant_combination[attr.name] === opt ? 'var(--accent-blue)' : 'var(--border-subtle)',
-                              background: details.variant_combination[attr.name] === opt ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
-                              color: details.variant_combination[attr.name] === opt ? 'var(--accent-blue)' : 'var(--text-secondary)',
-                              cursor: 'pointer',
-                              fontWeight: details.variant_combination[attr.name] === opt ? 600 : 400
-                            }}
+                            className={`chip variant-chip ${details.variant_combination[attr.name] === opt ? 'active' : ''}`}
                           >
                             {opt}
                           </button>
@@ -302,12 +295,11 @@ const CreateSalePost: React.FC = () => {
                     );
                     if (found && found.bottomPrice) {
                       return (
-                        <div style={{ marginTop: '8px', padding: '12px', background: 'rgba(16, 185, 129, 0.05)', borderRadius: '8px', border: '1px solid rgba(16, 185, 129, 0.1)' }}>
-                          <span style={{ color: 'var(--accent-green)', fontWeight: 600 }}>🎯 Giá đáy phiên bản này: {found.bottomPrice.toLocaleString('vi-VN')} đ</span>
+                        <div className="variant-price-suggestion mt-2 p-3 rounded">
+                          <span className="text-green font-semibold">🎯 Giá đáy phiên bản này: {found.bottomPrice.toLocaleString('vi-VN')} đ</span>
                           <button 
                             type="button" 
-                            className="btn-ghost" 
-                            style={{ marginLeft: '12px', fontSize: '0.8rem', padding: '2px 8px' }}
+                            className="btn-ghost btn-sm ml-3" 
                             onClick={() => setTargetPrice(found.bottomPrice!.toString())}
                           >
                             Áp dụng giá này
@@ -333,28 +325,29 @@ const CreateSalePost: React.FC = () => {
             )}
 
 
-            <div className="terms-section" style={{background: 'var(--bg-hover)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border-subtle)', marginTop: '24px', marginBottom: '24px'}}>
-              <h4 style={{marginBottom: '12px', color: 'var(--text-primary)', fontSize: '1.05rem'}}>Quy định Đăng tin ({type === 'request' ? 'Nhờ Săn' : type === 'offer' ? 'Đi Săn' : 'Pass Kèo'})</h4>
+            <div className="terms-section bg-hover p-4 rounded-lg mt-6 mb-6">
+              <h4 className="mb-3 text-primary text-lg">Quy định Đăng tin ({type === 'request' ? 'Nhờ Săn' : type === 'offer' ? 'Đi Săn' : 'Pass Kèo'})</h4>
               {renderRules()}
               
-              <div className="disclaimer-box" style={{fontSize: '0.85rem', color: 'var(--text-muted)', borderTop: '1px solid var(--border-subtle)', paddingTop: '16px', marginBottom: '16px', lineHeight: 1.6}}>
+              <div className="disclaimer-box border-glass mt-3 pt-3 mb-4">
                 <strong>⚠️ Miễn trừ trách nhiệm:</strong> TechHub AI chỉ là nền tảng trung gian kết nối cộng đồng săn sale. Chúng tôi tuyệt đối không can thiệp hay quản lý tài sản, không đảm bảo hoàn toàn tính xác thực của các giao dịch thỏa thuận cá nhân từ người dùng đóng góp. Người dùng tự chịu trách nhiệm về các giao dịch, mua bán trên không gian mạng. Admin có quyền gỡ bỏ mọi thông tin vi phạm quy định nền tảng (spam, lừa đảo, công kích) mà không cần báo trước.
               </div>
 
-              <div style={{display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', background: agreedToTerms ? 'rgba(59, 130, 246, 0.1)' : 'transparent', padding: '12px', borderRadius: '8px', border: agreedToTerms ? '1px solid var(--primary-color)' : '1px solid transparent', transition: 'all 0.2s ease'}} onClick={() => setAgreedToTerms(!agreedToTerms)}>
+              <div className={`terms-agreement ${agreedToTerms ? 'active' : ''}`} onClick={() => setAgreedToTerms(!agreedToTerms)}>
                 <input 
+                  title="Đồng ý quy định"
                   type="checkbox" 
                   checked={agreedToTerms} 
                   onChange={e => setAgreedToTerms(e.target.checked)} 
-                  style={{width: '24px', height: '24px', accentColor: 'var(--primary-color)', cursor: 'pointer', borderRadius: '4px'}}
+                  className="input-checkbox"
                 />
-                <label style={{fontSize: '0.95rem', fontWeight: agreedToTerms ? 600 : 500, userSelect: 'none', cursor: 'pointer', color: agreedToTerms ? 'var(--primary-color)' : 'var(--text-primary)'}}>
+                <label className="terms-label">
                   Tôi đã đọc, hiểu rõ và đồng ý với Hướng dẫn cộng đồng & Miễn trừ trách nhiệm.
                 </label>
               </div>
             </div>
 
-            <button type="submit" className="btn btn-primary w-full mt-2" style={{padding: '16px', fontSize: '1.1rem', opacity: (!agreedToTerms || loading) ? 0.6 : 1, transition: 'all 0.3s ease'}} disabled={loading || !agreedToTerms}>
+            <button type="submit" className={`submit-btn btn btn-primary w-full mt-2 ${(!agreedToTerms || loading) ? 'disabled' : ''}`} disabled={loading || !agreedToTerms}>
               {loading ? 'Đang xử lý...' : 'Xác Nhận Đăng Tin Ngay'}
             </button>
           </form>
