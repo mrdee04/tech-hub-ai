@@ -145,6 +145,7 @@ const AdminPanel: React.FC = () => {
       alert('Đã thêm sản phẩm thành công!');
       loadProducts();
       setNewProduct({ name: '', imageUrl: '', bottomPrice: '', rating: 5, category: 'phone', shops: [{ name: 'Shopee', url: '' }] });
+      setIsEditingProduct(false);
     }
   };
 
@@ -162,6 +163,7 @@ const AdminPanel: React.FC = () => {
     if (success) {
       alert('Cập nhật thành công!');
       setEditingProduct(null);
+      setIsEditingProduct(false);
       loadProducts();
     } else alert('Lỗi khi cập nhật sản phẩm.');
   };
@@ -208,6 +210,7 @@ const AdminPanel: React.FC = () => {
       alert('Thêm Reviewer thành công!');
       loadReviewers();
       setNewReviewer({ name: '', avatar_url: '', facebook_url: '', youtube_url: '' });
+      setIsEditingReviewer(false);
     }
   };
 
@@ -219,6 +222,7 @@ const AdminPanel: React.FC = () => {
     if (success) {
       alert('Cập nhật Profile Reviewer thành công!');
       setEditingReviewer(null);
+      setIsEditingReviewer(false);
       loadReviewers();
     } else alert('Lỗi khi cập nhật Reviewer.');
   };
@@ -243,6 +247,7 @@ const AdminPanel: React.FC = () => {
     if (success) {
       alert('Cập nhật thành viên thành công!');
       setEditingUser(null);
+      setIsEditingUser(false);
       loadUsers();
     } else alert('Lỗi khi cập nhật.');
   };
@@ -737,37 +742,156 @@ const AdminPanel: React.FC = () => {
              <p className="text-secondary mb-4">Vui lòng nhập đầy đủ thông tin bên dưới.</p>
              
              <div className="flex-column gap-4">
-               {isEditingProduct && (
-                 <form onSubmit={editingProduct ? handleUpdateProduct : handleAddProduct} className="flex-column gap-3">
-                   <input className="input-field" placeholder="Tên sản phẩm" value={editingProduct?.name || newProduct.name} onChange={e => editingProduct ? setEditingProduct({...editingProduct, name: e.target.value}) : setNewProduct({...newProduct, name: e.target.value})} required />
-                   <input className="input-field" placeholder="URL Hình ảnh" value={editingProduct?.imageUrl || newProduct.imageUrl} onChange={e => editingProduct ? setEditingProduct({...editingProduct, imageUrl: e.target.value}) : setNewProduct({...newProduct, imageUrl: e.target.value})} required />
-                   
-                    <div className="flex-center gap-3">
-                      <button type="submit" className="btn-admin btn-admin-primary flex-1">Lưu</button>
+                {isEditingProduct && (
+                  <form onSubmit={editingProduct ? handleUpdateProduct : handleAddProduct} className="flex-column gap-4">
+                    <div className="grid-settings gap-3">
+                      <div className="input-group flex-column gap-2">
+                        <label className="text-sm font-semibold text-secondary">TÊN SẢN PHẨM</label>
+                        <input className="input-field" placeholder="iPhone 15 Pro Max" value={editingProduct?.name || newProduct.name} onChange={e => editingProduct ? setEditingProduct({...editingProduct, name: e.target.value}) : setNewProduct({...newProduct, name: e.target.value})} required />
+                      </div>
+                      <div className="input-group flex-column gap-2">
+                        <label className="text-sm font-semibold text-secondary">CATEGORIES</label>
+                        <select className="input-field" value={editingProduct?.category || newProduct.category} onChange={e => editingProduct ? setEditingProduct({...editingProduct, category: e.target.value}) : setNewProduct({...newProduct, category: e.target.value})}>
+                          {CATEGORIES.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                    
+                    <div className="grid-settings gap-3">
+                      <div className="input-group flex-column gap-2">
+                        <label className="text-sm font-semibold text-secondary">URL HÌNH ẢNH</label>
+                        <input className="input-field" placeholder="https://..." value={editingProduct?.imageUrl || newProduct.imageUrl} onChange={e => editingProduct ? setEditingProduct({...editingProduct, imageUrl: e.target.value}) : setNewProduct({...newProduct, imageUrl: e.target.value})} required />
+                      </div>
+                      <div className="input-group flex-column gap-2">
+                        <label className="text-sm font-semibold text-secondary">GIÁ ĐÁY (ĐỊNH MỨC)</label>
+                        <input className="input-field" type="number" placeholder="20000000" value={editingProduct?.bottomPrice || newProduct.bottomPrice} onChange={e => editingProduct ? setEditingProduct({...editingProduct, bottomPrice: e.target.value}) : setNewProduct({...newProduct, bottomPrice: e.target.value})} />
+                      </div>
+                    </div>
+
+                    <div className="admin-card-inner">
+                      <div className="flex-between mb-2">
+                        <label className="text-sm font-semibold text-secondary">CÁC SHOP ĐANG BÁN</label>
+                        <button type="button" className="btn-admin btn-admin-secondary" style={{ padding: '2px 8px', fontSize: '0.75rem' }} onClick={() => {
+                          const currentShops = editingProduct ? [...(editingProduct.shops || [])] : [...(newProduct.shops || [])];
+                          currentShops.push({ name: 'Shopee', url: '' });
+                          editingProduct ? setEditingProduct({...editingProduct, shops: currentShops}) : setNewProduct({...newProduct, shops: currentShops});
+                        }}>+ Thêm shop</button>
+                      </div>
+                      <div className="flex-column gap-2">
+                        {(editingProduct?.shops || newProduct.shops || []).map((shop, idx) => (
+                          <div key={idx} className="flex-center gap-2">
+                            <input className="input-field" style={{ flex: 1 }} placeholder="Tên Shop" value={shop.name} onChange={e => {
+                               const currentShops = editingProduct ? [...(editingProduct.shops || [])] : [...(newProduct.shops || [])];
+                               currentShops[idx].name = e.target.value;
+                               editingProduct ? setEditingProduct({...editingProduct, shops: currentShops}) : setNewProduct({...newProduct, shops: currentShops});
+                            }} />
+                            <input className="input-field" style={{ flex: 2 }} placeholder="URL Shop" value={shop.url} onChange={e => {
+                               const currentShops = editingProduct ? [...(editingProduct.shops || [])] : [...(newProduct.shops || [])];
+                               currentShops[idx].url = e.target.value;
+                               editingProduct ? setEditingProduct({...editingProduct, shops: currentShops}) : setNewProduct({...newProduct, shops: currentShops});
+                            }} />
+                            <button type="button" className="btn-admin btn-admin-danger" style={{ padding: '8px' }} onClick={() => {
+                               const currentShops = (editingProduct ? editingProduct.shops : newProduct.shops || []).filter((_, i) => i !== idx);
+                               editingProduct ? setEditingProduct({...editingProduct, shops: currentShops}) : setNewProduct({...newProduct, shops: currentShops});
+                            }}>×</button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Variant Section */}
+                    {editingProduct && (
+                      <div className="admin-card-inner">
+                        <h4 className="text-secondary text-sm font-bold mb-3">📍 QUẢN LÝ PHIÊN BẢN (VARIANTS)</h4>
+                        <div className="flex-column gap-3">
+                          {(editingProduct.variants?.attributes || []).map((attr, attrIdx) => (
+                            <div key={attrIdx} className="p-3 rounded bg-deep border-glass">
+                               <div className="flex-between mb-2">
+                                  <input className="input-field font-bold w-auto" placeholder="Tên loại" value={attr.name} onChange={e => {
+                                     const newAttrs = [...(editingProduct.variants?.attributes || [])];
+                                     newAttrs[attrIdx].name = e.target.value;
+                                     setEditingProduct({...editingProduct, variants: {...editingProduct.variants!, attributes: newAttrs }});
+                                  }} />
+                                  <button type="button" className="btn-admin btn-admin-danger" style={{ padding: '4px 8px' }} onClick={() => {
+                                     const newAttrs = editingProduct.variants?.attributes?.filter((_, i) => i !== attrIdx);
+                                     setEditingProduct({...editingProduct, variants: {...editingProduct.variants!, attributes: newAttrs || [] }});
+                                  }}>Xóa</button>
+                               </div>
+                               <div className="flex-center gap-2 flex-wrap" style={{ justifyContent: 'flex-start' }}>
+                                 {attr.options.map((opt, optIdx) => (
+                                   <div key={optIdx} className="admin-badge flex-center gap-2">
+                                      <input className="input-field-inline w-fit" value={opt} onChange={e => {
+                                         const newAttrs = [...(editingProduct.variants?.attributes || [])];
+                                         newAttrs[attrIdx].options[optIdx] = e.target.value;
+                                         setEditingProduct({...editingProduct, variants: {...editingProduct.variants!, attributes: newAttrs }});
+                                      }} />
+                                      <span className="cursor-pointer opacity-60" onClick={() => {
+                                         const newAttrs = [...(editingProduct.variants?.attributes || [])];
+                                         newAttrs[attrIdx].options = newAttrs[attrIdx].options.filter((_, i) => i !== optIdx);
+                                         setEditingProduct({...editingProduct, variants: {...editingProduct.variants!, attributes: newAttrs }});
+                                      }}>×</span>
+                                   </div>
+                                 ))}
+                                 <button type="button" className="btn-admin btn-admin-secondary" style={{ padding: '2px 8px', fontSize: '0.7rem' }} onClick={() => {
+                                    const newAttrs = [...(editingProduct.variants?.attributes || [])];
+                                    newAttrs[attrIdx].options.push('Mới');
+                                    setEditingProduct({...editingProduct, variants: {...editingProduct.variants!, attributes: newAttrs }});
+                                 }}>+ Lựa chọn</button>
+                               </div>
+                            </div>
+                          ))}
+                          <button type="button" className="btn-admin btn-admin-secondary" onClick={() => {
+                             const currentVariants = editingProduct.variants || { attributes: [], variantPrices: [] };
+                             setEditingProduct({...editingProduct, variants: { ...currentVariants, attributes: [...currentVariants.attributes, { name: 'Phân loại mới', options: [] }] }});
+                          }}>+ Thêm tiêu chí phân loại</button>
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="flex-center gap-3 mt-2">
+                      <button type="submit" className="btn-admin btn-admin-primary flex-1">Lưu Sản Phẩm</button>
                       <button type="button" className="btn-admin btn-admin-secondary" onClick={() => setIsEditingProduct(false)}>Hủy</button>
                     </div>
-                 </form>
-               )}
-               {isEditingReviewer && (
-                 <form onSubmit={editingReviewer ? handleUpdateReviewerSubmit : handleAddReviewer} className="flex-column gap-3">
-                   <input className="input-field" placeholder="Tên Reviewer" value={editingReviewer?.name || newReviewer.name} onChange={e => editingReviewer ? setEditingReviewer({...editingReviewer, name: e.target.value}) : setNewReviewer({...newReviewer, name: e.target.value})} required />
-                   <input className="input-field" placeholder="Avatar URL" value={editingReviewer?.avatar_url || newReviewer.avatar_url} onChange={e => editingReviewer ? setEditingReviewer({...editingReviewer, avatar_url: e.target.value}) : setNewReviewer({...newReviewer, avatar_url: e.target.value})} />
-                   <div className="flex-center gap-3">
-                     <button type="submit" className="btn-admin btn-admin-primary flex-1">Lưu</button>
-                     <button type="button" className="btn-admin btn-admin-secondary" onClick={() => setIsEditingReviewer(false)}>Hủy</button>
-                   </div>
-                 </form>
-               )}
-               {isEditingUser && editingUser && (
-                 <form onSubmit={handleUpdateUserSubmit} className="flex-column gap-3">
-                   <input className="input-field" placeholder="Tên hiển thị" value={editingUser.full_name || ''} onChange={e => setEditingUser({...editingUser, full_name: e.target.value})} required />
-                   <input className="input-field" type="number" placeholder="Điểm uy tín" value={editingUser.reputation_score || 0} onChange={e => setEditingUser({...editingUser, reputation_score: parseInt(e.target.value)})} />
-                   <div className="flex-center gap-3">
-                     <button type="submit" className="btn-admin btn-admin-primary flex-1">Lưu</button>
-                     <button type="button" className="btn-admin btn-admin-secondary" onClick={() => setIsEditingUser(false)}>Hủy</button>
-                   </div>
-                 </form>
-               )}
+                  </form>
+                )}
+                
+                {isEditingReviewer && (
+                  <form onSubmit={editingReviewer ? handleUpdateReviewerSubmit : handleAddReviewer} className="flex-column gap-4">
+                    <div className="input-group flex-column gap-2">
+                       <label className="text-sm font-semibold text-secondary">TÊN REVIEWER</label>
+                       <input className="input-field" placeholder="VD: Duy Luân Dễ Thương" value={editingReviewer?.name || newReviewer.name} onChange={e => editingReviewer ? setEditingReviewer({...editingReviewer, name: e.target.value}) : setNewReviewer({...newReviewer, name: e.target.value})} required />
+                    </div>
+                    <div className="input-group flex-column gap-2">
+                       <label className="text-sm font-semibold text-secondary">AVATAR URL</label>
+                       <input className="input-field" placeholder="https://..." value={editingReviewer?.avatar_url || newReviewer.avatar_url} onChange={e => editingReviewer ? setEditingReviewer({...editingReviewer, avatar_url: e.target.value}) : setNewReviewer({...newReviewer, avatar_url: e.target.value})} />
+                    </div>
+                    <div className="grid-settings gap-3">
+                        <div className="input-group flex-column gap-2">
+                          <label className="text-sm font-semibold text-secondary">FACEBOOK URL</label>
+                          <input className="input-field" placeholder="facebook.com/..." value={editingReviewer?.facebook_url || newReviewer.facebook_url} onChange={e => editingReviewer ? setEditingReviewer({...editingReviewer, facebook_url: e.target.value}) : setNewReviewer({...newReviewer, facebook_url: e.target.value})} />
+                        </div>
+                        <div className="input-group flex-column gap-2">
+                          <label className="text-sm font-semibold text-secondary">YOUTUBE URL</label>
+                          <input className="input-field" placeholder="youtube.com/@..." value={editingReviewer?.youtube_url || newReviewer.youtube_url} onChange={e => editingReviewer ? setEditingReviewer({...editingReviewer, youtube_url: e.target.value}) : setNewReviewer({...newReviewer, youtube_url: e.target.value})} />
+                        </div>
+                    </div>
+                    <div className="flex-center gap-3 mt-2">
+                      <button type="submit" className="btn-admin btn-admin-primary flex-1">Lưu Reviewer</button>
+                      <button type="button" className="btn-admin btn-admin-secondary" onClick={() => setIsEditingReviewer(false)}>Hủy</button>
+                    </div>
+                  </form>
+                )}
+
+                {isEditingUser && editingUser && (
+                  <form onSubmit={handleUpdateUserSubmit} className="flex-column gap-3">
+                    <input className="input-field" placeholder="Tên hiển thị" value={editingUser.full_name || ''} onChange={e => setEditingUser({...editingUser, full_name: e.target.value})} required />
+                    <input className="input-field" type="number" placeholder="Điểm uy tín" value={editingUser.reputation_score || 0} onChange={e => setEditingUser({...editingUser, reputation_score: parseInt(e.target.value)})} />
+                    <div className="flex-center gap-3">
+                      <button type="submit" className="btn-admin btn-admin-primary flex-1">Lưu</button>
+                      <button type="button" className="btn-admin btn-admin-secondary" onClick={() => setIsEditingUser(false)}>Hủy</button>
+                    </div>
+                  </form>
+                )}
              </div>
           </div>
         </div>

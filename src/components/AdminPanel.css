@@ -355,3 +355,19 @@
   border-radius: 12px;
   border: 1px solid var(--border-glass);
 }
+
+.w-120 { width: 120px; }
+.w-fit { width: fit-content; }
+.max-w-300 { max-width: 300px; }
+.cursor-pointer { cursor: pointer; }
+.opacity-60 { opacity: 0.6; }
+
+.input-field-inline {
+  background: transparent;
+  border: none;
+  color: inherit;
+  outline: none;
+  width: 80px;
+  font-size: inherit;
+  font-family: inherit;
+}
