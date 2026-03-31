@@ -21,6 +21,13 @@ const ProductDetail: React.FC = () => {
   // Modal state for specific details
   const [modalType, setModalType] = useState<'proof' | 'screenshot' | null>(null);
   const [modalContent, setModalContent] = useState<string | null>(null);
+  const [selectedVariant, setSelectedVariant] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (product?.variants) {
+      setSelectedVariant({});
+    }
+  }, [product]);
 
   useEffect(() => {
     if (id) {
@@ -79,6 +86,20 @@ const ProductDetail: React.FC = () => {
   const filteredReviews = product.reviews?.filter(r => r.type === activeReviewTab) || [];
   const reviewers = product.reviews?.filter(r => r.type === 'reviewer') || [];
 
+  const currentVariantPrice = product.variants?.variantPrices.find(vp => 
+    Object.entries(selectedVariant).length > 0 &&
+    Object.entries(selectedVariant).every(([k, v]) => vp.combination[k] === v)
+  );
+
+  const getMinVariantPrice = () => {
+    if (!product.variants?.variantPrices || product.variants.variantPrices.length === 0) return null;
+    const prices = product.variants.variantPrices.map(vp => Number(vp.bottomPrice)).filter(p => !isNaN(p) && p > 0);
+    return prices.length > 0 ? Math.min(...prices) : null;
+  };
+
+  const minPrice = getMinVariantPrice();
+  const displayPrice = currentVariantPrice?.bottomPrice || minPrice || product.bottomPrice;
+
   return (
     <div className="product-detail-page">
       <button className="back-btn" onClick={() => navigate('/')}>← Quay lại trang chủ</button>
@@ -96,13 +117,49 @@ const ProductDetail: React.FC = () => {
               <span className="count">({product.reviewCount} đánh giá từ người dùng)</span>
             </div>
             <div className="detail-price">
-              <span className="label">Giá Đáy Kỷ Lục:</span>
-              <span className="value">
-                {typeof product.bottomPrice === 'number' 
-                  ? product.bottomPrice.toLocaleString('vi-VN') 
-                  : Number(product.bottomPrice?.toString().replace(/[^0-9.-]+/g,"")).toLocaleString('vi-VN')} đ
-              </span>
+              <div className="flex-column">
+                <span className="label">{currentVariantPrice ? 'Giá Biến Thể:' : 'Giá Đáy Thấp Nhất:'}</span>
+                <span className="value">
+                  {typeof displayPrice === 'number' 
+                    ? displayPrice.toLocaleString('vi-VN') 
+                    : Number(displayPrice?.toString().replace(/[^0-9.-]+/g,"")).toLocaleString('vi-VN')} đ
+                </span>
+              </div>
             </div>
+
+            {/* VARIANT SELECTOR */}
+            {product.variants?.attributes && product.variants.attributes.length > 0 && (
+              <div className="variant-selector-detail mt-6 flex-column gap-4 p-4 rounded bg-deep-light border-glass">
+                <h3 className="text-secondary" style={{fontSize: '0.9rem', fontWeight: 700}}>CHỌN PHIÊN BẢN SẢN PHẨM</h3>
+                {product.variants.attributes.map(attr => (
+                  <div key={attr.name} className="variant-row-detail flex-column gap-2">
+                    <span className="text-sm font-semibold opacity-70">{attr.name}</span>
+                    <div className="flex-center flex-wrap" style={{ justifyContent: 'flex-start', gap: '8px' }}>
+                      {attr.options.map(opt => (
+                        <button 
+                          key={opt}
+                          onClick={() => setSelectedVariant({ ...selectedVariant, [attr.name]: opt })}
+                          className={`variant-opt-btn ${selectedVariant[attr.name] === opt ? 'active' : ''}`}
+                          style={{
+                            padding: '8px 16px',
+                            borderRadius: '8px',
+                            background: selectedVariant[attr.name] === opt ? 'var(--accent-blue)' : 'rgba(255,255,255,0.05)',
+                            color: selectedVariant[attr.name] === opt ? 'white' : 'var(--text-secondary)',
+                            border: '1px solid',
+                            borderColor: selectedVariant[attr.name] === opt ? 'var(--accent-blue)' : 'rgba(255,255,255,0.1)',
+                            cursor: 'pointer',
+                            fontSize: '0.9rem',
+                            transition: 'all 0.2s'
+                          }}
+                        >
+                          {opt}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
             
             <div className="mt-6">
               <h3 className="text-secondary mb-4" style={{fontSize: '1rem'}}>⚡ Hành động Săn Sale cùng Cộng Đồng</h3>

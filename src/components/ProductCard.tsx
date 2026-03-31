@@ -77,23 +77,25 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
   const [selectedVariant, setSelectedVariant] = useState<Record<string, string>>({});
   const [showReportModal, setShowReportModal] = useState(false);
 
-  // Initialize selected variant with first options if available
+  // Initialize selected variant with empty object to show "lowest price" by default
   useEffect(() => {
-    if (product.variants?.attributes) {
-      const initial: Record<string, string> = {};
-      product.variants.attributes.forEach(attr => {
-        if (attr.options.length > 0) initial[attr.name] = attr.options[0];
-      });
-      setSelectedVariant(initial);
-    }
+    setSelectedVariant({});
   }, [product.variants]);
 
   // Find price for current selection
   const currentVariantPrice = product.variants?.variantPrices.find(vp => 
+    Object.entries(selectedVariant).length > 0 &&
     Object.entries(selectedVariant).every(([k, v]) => vp.combination[k] === v)
   );
 
-  const displayPrice = currentVariantPrice?.bottomPrice || product.bottomPrice;
+  const getMinVariantPrice = () => {
+    if (!product.variants?.variantPrices || product.variants.variantPrices.length === 0) return null;
+    const prices = product.variants.variantPrices.map(vp => Number(vp.bottomPrice)).filter(p => !isNaN(p) && p > 0);
+    return prices.length > 0 ? Math.min(...prices) : null;
+  };
+
+  const minPrice = getMinVariantPrice();
+  const displayPrice = currentVariantPrice?.bottomPrice || minPrice || product.bottomPrice;
   const isPriceDefined = !!displayPrice && displayPrice !== 'Chưa xác định' && displayPrice !== 0;
 
   return (
@@ -164,7 +166,9 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
           </div>
 
           <div className="flex-column mt-2" style={{marginBottom: '16px'}}>
-            <span className="text-muted" style={{fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em'}}>Giá Đáy {currentVariantPrice ? '(Phân loại)' : ''}</span>
+            <span className="text-muted" style={{fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em'}}>
+              {currentVariantPrice ? 'Giá Biến Thể' : 'Giá Đáy Thấp Nhất'}
+            </span>
             {isPriceDefined ? (
               <span className="text-gradient" style={{fontSize: '1.3rem', fontWeight: 800}}>
                 {typeof displayPrice === 'number' 

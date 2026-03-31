@@ -158,14 +158,68 @@ const AdminPanel: React.FC = () => {
   const handleUpdateProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingProduct) return;
-    const { id, reviews: _revs, reviewCount: _rc, topReview: _tr, ...updates } = editingProduct as any;
-    const success = await updateProduct(id, updates);
+    
+    // Ensure numeric types
+    const updates = {
+      ...editingProduct,
+      bottomPrice: Number(editingProduct.bottomPrice),
+      rating: Number(editingProduct.rating)
+    };
+    
+    const { id, reviews: _revs, reviewCount: _rc, topReview: _tr, ...cleanUpdates } = updates as any;
+    const success = await updateProduct(id, cleanUpdates);
     if (success) {
       alert('Cập nhật thành công!');
       setEditingProduct(null);
       setIsEditingProduct(false);
       loadProducts();
     } else alert('Lỗi khi cập nhật sản phẩm.');
+  };
+
+  const generateVariantCombinations = (attributes: any[]) => {
+    if (!attributes || attributes.length === 0) return [];
+    
+    let combinations: any[] = [{}];
+    
+    attributes.forEach(attr => {
+      const newCombinations: any[] = [];
+      attr.options.forEach((opt: string) => {
+        combinations.forEach(comb => {
+          newCombinations.push({ ...comb, [attr.name]: opt });
+        });
+      });
+      combinations = newCombinations;
+    });
+    
+    return combinations;
+  };
+
+  const handleSyncVariantPrices = () => {
+    if (!editingProduct) return;
+    const attrs = editingProduct.variants?.attributes || [];
+    if (attrs.length === 0) {
+      alert('Vui lòng thêm ít nhất một tiêu chí phân loại trước.');
+      return;
+    }
+
+    const combinations = generateVariantCombinations(attrs);
+    const existingPrices = editingProduct.variants?.variantPrices || [];
+    
+    const newVariantPrices = combinations.map(comb => {
+      const existing = existingPrices.find((vp: any) => 
+        Object.keys(comb).every(k => comb[k] === vp.combination[k]) &&
+        Object.keys(vp.combination).every(k => comb[k] === vp.combination[k])
+      );
+      return existing || { combination: comb, bottomPrice: 0 };
+    });
+
+    setEditingProduct({
+      ...editingProduct,
+      variants: {
+        ...(editingProduct.variants || { attributes: [] }),
+        variantPrices: newVariantPrices
+      }
+    });
   };
 
   const extractReviewerProfileProps = (reviewerName: string) => {
@@ -802,8 +856,15 @@ const AdminPanel: React.FC = () => {
                     {/* Variant Section */}
                     {editingProduct && (
                       <div className="admin-card-inner">
-                        <h4 className="text-secondary text-sm font-bold mb-3">📍 QUẢN LÝ PHIÊN BẢN (VARIANTS)</h4>
-                        <div className="flex-column gap-3">
+                        <div className="flex-between mb-3">
+                           <h4 className="text-secondary text-sm font-bold m-0">📍 QUẢN LÝ PHIÊN BẢN (VARIANTS)</h4>
+                           <button type="button" className="btn-admin btn-admin-primary btn-sm" onClick={handleSyncVariantPrices}>
+                             🔄 Cập nhật danh sách biến thể
+                           </button>
+                        </div>
+                        
+                        {/* Attributes Editor */}
+                        <div className="flex-column gap-3 mb-4">
                           {(editingProduct.variants?.attributes || []).map((attr, attrIdx) => (
                             <div key={attrIdx} className="p-3 rounded bg-deep border-glass">
                                <div className="flex-between mb-2">
@@ -845,6 +906,45 @@ const AdminPanel: React.FC = () => {
                              setEditingProduct({...editingProduct, variants: { ...currentVariants, attributes: [...currentVariants.attributes, { name: 'Phân loại mới', options: [] }] }});
                           }}>+ Thêm tiêu chí phân loại</button>
                         </div>
+
+                        {/* Prices Editor */}
+                        {editingProduct.variants?.variantPrices && editingProduct.variants.variantPrices.length > 0 && (
+                          <div className="variant-prices-list mt-4">
+                            <div className="flex-between mb-2">
+                               <h5 className="text-secondary text-xs font-bold uppercase">Giá đáy từng biến thể</h5>
+                               <button type="button" className="btn-admin btn-admin-secondary btn-sm" style={{fontSize: '0.7rem'}} onClick={() => {
+                                  const prices = (editingProduct.variants?.variantPrices || []).map(vp => Number(vp.bottomPrice)).filter(p => !isNaN(p) && p > 0);
+                                  if (prices.length > 0) {
+                                    const minPrice = Math.min(...prices);
+                                    setEditingProduct({...editingProduct, bottomPrice: minPrice});
+                                  }
+                               }}>Lấy giá thấp nhất làm giá đáy chính</button>
+                            </div>
+                            <div className="flex-column gap-2">
+                              {editingProduct.variants.variantPrices.map((vp, vpIdx) => (
+                                <div key={vpIdx} className="variant-price-row flex-between p-2 rounded bg-deep-light">
+                                  <div className="variant-label text-sm">
+                                    {Object.entries(vp.combination).map(([k, v]) => `${k}: ${v}`).join(' / ')}
+                                  </div>
+                                  <div className="flex-center gap-2">
+                                    <input 
+                                      type="number" 
+                                      className="input-field input-field-sm w-120" 
+                                      placeholder="Giá đáy"
+                                      value={vp.bottomPrice || ''} 
+                                      onChange={e => {
+                                        const newPrices = [...(editingProduct.variants?.variantPrices || [])];
+                                        newPrices[vpIdx].bottomPrice = Number(e.target.value);
+                                        setEditingProduct({...editingProduct, variants: {...editingProduct.variants!, variantPrices: newPrices }});
+                                      }}
+                                    />
+                                    <span className="text-xs text-secondary">đ</span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                     
