@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { fetchReviewerById, fetchReviewsByReviewer, type Reviewer, type Review } from '../services/reviewService';
-import { ProductCard } from './ProductCard';
+import ProductCard from './ProductCard';
 
 const ReviewerProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();

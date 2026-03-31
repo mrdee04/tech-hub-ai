@@ -1,0 +1,64 @@
+[
+  {
+    "id": "f07ab0bf-d300-4049-a6d6-7f066bb8b565",
+    "name": "iPhone 17 Pro Max",
+    "image_url": "https://www.techone.vn/wp-content/uploads/2025/09/Thumb-sp-17-series_0001_17-prm-cam-1536x1536.jpg",
+    "bottom_price": "15.000.000 VNĐ",
+    "rating": 5,
+    "review_count": 0,
+    "top_review": "aaa",
+    "shops": [
+      {
+        "url": "https://shopee.vn/samsung-watch-6",
+        "name": "Sàn TMĐT"
+      }
+    ],
+    "created_at": "2026-03-19T11:00:21.072377+00:00",
+    "category": "other",
+    "bottom_price_time": null,
+    "bottom_price_platform": null,
+    "bottom_price_link": null,
+    "day_vuong": null
+  },
+  {
+    "id": "e7b856a4-a889-4a9f-a9de-ef4e300a5549",
+    "name": "iPhone 17 Pro Max",
+    "image_url": "https://www.techone.vn/wp-content/uploads/2025/09/Thumb-sp-17-series_0001_17-prm-cam-1536x1536.jpg",
+    "bottom_price": "15.000.000 VNĐ",
+    "rating": 5,
+    "review_count": 0,
+    "top_review": "gfhf",
+    "shops": [
+      {
+        "url": "https://shopee.vn/samsung-watch-6",
+        "name": "Sàn TMĐT"
+      }
+    ],
+    "created_at": "2026-03-19T11:07:06.670717+00:00",
+    "category": "other",
+    "bottom_price_time": null,
+    "bottom_price_platform": null,
+    "bottom_price_link": null,
+    "day_vuong": null
+  },
+  {
+    "id": "9099b2f4-b3e9-4b9f-a56f-7b03856aa08a",
+    "name": "iPhone 17 Pro Max",
+    "image_url": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?q=80&w=2070&auto=format&fit=crop",
+    "bottom_price": "32000000",
+    "rating": 4.9,
+    "review_count": 0,
+    "top_review": "Chip A19 Pro cực mạnh, camera bar thiết kế mới lạ.",
+    "shops": [
+      "Apple Store",
+      "FPT Shop",
+      "The Gioi Di Dong"
+    ],
+    "created_at": "2026-03-20T03:57:30.927147+00:00",
+    "category": "phone",
+    "bottom_price_time": null,
+    "bottom_price_platform": null,
+    "bottom_price_link": null,
+    "day_vuong": null
+  }
+]

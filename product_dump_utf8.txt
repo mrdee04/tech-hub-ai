@@ -1,0 +1,29 @@
+ID: f07ab0bf-d300-4049-a6d6-7f066bb8b565 | Name: iPhone 17 Pro Max
+ID: e7b856a4-a889-4a9f-a9de-ef4e300a5549 | Name: iPhone 17 Pro Max
+ID: 872023c6-8d91-4d28-9824-6ab9762682b5 | Name: iPhone 15 Pro Max
+ID: 9f8785b6-8fae-4ac9-86f1-c8c525c8ffcc | Name: Samsung Galaxy S24 Ultra
+ID: a9a3a99e-ff5b-47dd-b456-41f9fdac9b07 | Name: Google Pixel 8 Pro
+ID: c9e37c86-21e5-41fa-b868-da7418f3052f | Name: iPad Pro M2 12.9"
+ID: 635b106a-26df-4622-a182-9bf81a0cfeb1 | Name: Galaxy Tab S9 Ultra
+ID: 781c7518-d8db-4952-9e13-09f425afb02a | Name: Surface Pro 9
+ID: 895d4230-c2cf-4dbd-a528-b3e5358555d0 | Name: MacBook Air M3
+ID: b8c7dbb7-9846-4a53-aae2-13f154a0e175 | Name: Dell XPS 13 Plus
+ID: 171d5dba-4821-403d-b494-aa8098100bc1 | Name: LG Gram 2024
+ID: 882e8238-4aaa-4bc2-8fe4-43fa208b3db6 | Name: AirPods Pro 2
+ID: 16c73b21-4185-40df-8547-34bef917cc78 | Name: Sony WH-1000XM5
+ID: 9b0b34d6-73dd-4815-9fdf-688e73f9f4b3 | Name: Apple Watch Ultra 2
+ID: 5d68bbbc-4f06-473a-bb7a-812ba26d7c6a | Name: Apple Vision Pro
+ID: 3e3374f6-ce33-4bf5-a808-a53b2c8e9c4b | Name: PlayStation 5 Slim
+ID: dae0ab39-950b-4bab-9fa4-95a643279822 | Name: DJI Mini 4 Pro
+ID: 9099b2f4-b3e9-4b9f-a56f-7b03856aa08a | Name: iPhone 17 Pro Max
+ID: 6132a36a-ba8e-4048-953f-3384b6cf6ece | Name: Samsung Galaxy S26 Ultra
+ID: 5d101ed2-e478-4728-9505-c2cf926ca1a8 | Name: Xiaomi 16 Ultra
+ID: f7eb69a1-a666-4b03-98ca-aa870d341a04 | Name: iPad Pro 13-inch (M5)
+ID: b11d32eb-0d08-4551-8c91-208ebc815763 | Name: Samsung Galaxy Tab S11 Ultra
+ID: 86bd8214-6cdc-4ff5-a9c2-52503fc315ae | Name: OnePlus Pad 3
+ID: 1b88a9ff-138a-4361-a13c-99e784805c0f | Name: MacBook Air M4
+ID: fe78edfc-86d7-47b5-831c-fa5889fb93f8 | Name: Dell XPS 14 (2026)
+ID: 44d75842-faaa-471a-a97f-b333a5e5ea58 | Name: ASUS ROG Zephyrus G16 (2026)
+ID: fc358c1b-cfb0-4149-b7b1-3dce0d354ccd | Name: AirPods Pro 3
+ID: 9089a12f-e707-4cb6-9ad4-d47cd5cb4c5c | Name: Sony WH-1000XM6
+ID: 88239488-920e-4289-86a6-f17766baaae2 | Name: Apple Watch Series 11

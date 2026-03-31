@@ -1,0 +1,6 @@
+Table: products | Row Count: 29
+Table: reviews | Row Count: 0
+Table: reviewers | Row Count: 1
+Table: profiles | Row Count: 1
+Table: sale_posts | Row Count: 0
+Table: comments | Row Count: 0

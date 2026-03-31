@@ -52,7 +52,8 @@ export const fetchAllReviews = async (): Promise<ReviewWithProduct[]> => {
     .from('reviews')
     .select(`
       *,
-      products ( name )
+      products ( name ),
+      reviewers ( * )
     `)
     .order('created_at', { ascending: false });
 
@@ -63,7 +64,13 @@ export const fetchAllReviews = async (): Promise<ReviewWithProduct[]> => {
   
   // Parse reviewerProfile if it comes back as stringified JSON or an object
   return (data || []).map(item => {
-    let reviewerProfile = item.reviewerProfile;
+    // Priority: Fresh data from join > Stored JSON
+    let reviewerProfile = (item as any).reviewers ? {
+      avatarUrl: (item as any).reviewers.avatar_url,
+      facebookUrl: (item as any).reviewers.facebook_url,
+      youtubeUrl: (item as any).reviewers.youtube_url
+    } : item.reviewerProfile;
+
     // Check if reviewerProfile needs parsing (in case stored differently)
     if (typeof reviewerProfile === 'string') {
       try {
@@ -75,6 +82,7 @@ export const fetchAllReviews = async (): Promise<ReviewWithProduct[]> => {
     
     return {
       ...item,
+      productName: (item as any).products?.name || 'Unknown Product',
       reviewerProfile,
     };
   }) as ReviewWithProduct[];

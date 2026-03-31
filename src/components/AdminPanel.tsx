@@ -975,7 +975,8 @@ const AdminPanel: React.FC = () => {
 
                     {/* Variant Section */}
                     {editingProduct && (
-                      <div className="admin-card-inner">
+                      <>
+                        <div className="admin-card-inner">
                         <div className="flex-between mb-3">
                            <h4 className="text-secondary text-sm font-bold m-0">📍 QUẢN LÝ PHIÊN BẢN (VARIANTS)</h4>
                            <button type="button" className="btn-admin btn-admin-primary btn-sm" onClick={handleSyncVariantPrices}>
@@ -1066,13 +1067,63 @@ const AdminPanel: React.FC = () => {
                           </div>
                         )}
                       </div>
-                    )}
-                    
-                    <div className="flex-center gap-3 mt-2">
-                      <button type="submit" className="btn-admin btn-admin-primary flex-1">Lưu Sản Phẩm</button>
-                      <button type="button" className="btn-admin btn-admin-secondary" onClick={() => setIsEditingProduct(false)}>Hủy</button>
-                    </div>
-                  </form>
+                      
+                      {/* Reviews Section */}
+                      <div className="admin-card-inner">
+                        <div className="flex-between mb-3">
+                          <h4 className="text-secondary text-sm font-bold m-0">⭐ QUẢN LÝ ĐÁNH GIÁ</h4>
+                          <button type="button" className="btn-admin btn-admin-primary btn-sm" onClick={() => {
+                            setSelectedProductForReviews(editingProduct);
+                            setIsAddingReview(true);
+                          }}>+ Thêm đánh giá mới</button>
+                        </div>
+
+                        <div className="admin-table-mini-container">
+                          <table className="admin-table table-sm">
+                            <thead>
+                              <tr>
+                                <th>Tác giả</th>
+                                <th>Loại</th>
+                                <th>Nội dung</th>
+                                <th className="text-right">Hành động</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {reviews.filter(r => r.product_id === editingProduct.id).length > 0 ? (
+                                reviews.filter(r => r.product_id === editingProduct.id).map(r => (
+                                  <tr key={r.id}>
+                                    <td className="text-sm font-semibold">{r.author}</td>
+                                    <td>
+                                      <span className={`admin-badge badge-${r.type} text-xs`}>
+                                        {r.type === 'reviewer' ? 'KOL' : 'User'}
+                                      </span>
+                                    </td>
+                                    <td>
+                                      <div className="text-truncate text-xs text-secondary max-w-200">{r.content}</div>
+                                    </td>
+                                    <td>
+                                      <div className="flex-center gap-2 flex-end">
+                                        <button type="button" className="btn-admin btn-admin-danger btn-xs" onClick={() => handleDeleteReview(r.id)}>Xóa</button>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                ))
+                              ) : (
+                                <tr>
+                                  <td colSpan={4} className="text-center py-4 text-muted text-sm">Chưa có đánh giá nào cho sản phẩm này.</td>
+                                </tr>
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                  <div className="flex-center gap-3 mt-2">
+                    <button type="submit" className="btn-admin btn-admin-primary flex-1">Lưu Sản Phẩm</button>
+                    <button type="button" className="btn-admin btn-admin-secondary" onClick={() => setIsEditingProduct(false)}>Hủy</button>
+                  </div>
+                </form>
                 )}
                 
                 {isEditingReviewer && (

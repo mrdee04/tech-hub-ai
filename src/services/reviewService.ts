@@ -30,7 +30,7 @@ export interface Review {
 export const fetchReviewsForProduct = async (productId: string): Promise<Review[]> => {
   const { data, error } = await supabase
     .from('reviews')
-    .select('*')
+    .select('*, reviewers(*)')
     .eq('product_id', productId)
     .order('created_at', { ascending: false });
 
@@ -38,7 +38,16 @@ export const fetchReviewsForProduct = async (productId: string): Promise<Review[
     console.error('Error fetching reviews:', error);
     return [];
   }
-  return data as Review[];
+
+  // Map reviewer data to reviewerProfile if present
+  return (data as any[]).map(item => ({
+    ...item,
+    reviewerProfile: item.reviewers ? {
+      avatarUrl: item.reviewers.avatar_url,
+      facebookUrl: item.reviewers.facebook_url,
+      youtubeUrl: item.reviewers.youtube_url
+    } : item.reviewerProfile
+  })) as Review[];
 };
 
 export const fetchAllReviewers = async (): Promise<Reviewer[]> => {
