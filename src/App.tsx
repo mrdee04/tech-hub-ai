@@ -17,6 +17,7 @@ function Home() {
 
   return (
     <main className="container-width flex-column gap-8 mt-8 mb-8">
+      {/* Categories and Products */}
 
       <section className="flex-column gap-6">
         <CategoryTabs 
