@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { fetchProductById } from '../services/productService';
 import { fetchComments, addComment } from '../services/commentService';
 import type { Product, Comment } from './ProductCard';
@@ -130,27 +130,16 @@ const ProductDetail: React.FC = () => {
             {/* VARIANT SELECTOR */}
             {product.variants?.attributes && product.variants.attributes.length > 0 && (
               <div className="variant-selector-detail mt-6 flex-column gap-4 p-4 rounded bg-deep-light border-glass">
-                <h3 className="text-secondary" style={{fontSize: '0.9rem', fontWeight: 700}}>CHỌN PHIÊN BẢN SẢN PHẨM</h3>
+                <h3 className="text-secondary">CHỌN PHIÊN BẢN SẢN PHẨM</h3>
                 {product.variants.attributes.map(attr => (
                   <div key={attr.name} className="variant-row-detail flex-column gap-2">
                     <span className="text-sm font-semibold opacity-70">{attr.name}</span>
-                    <div className="flex-center flex-wrap" style={{ justifyContent: 'flex-start', gap: '8px' }}>
+                    <div className="flex-center flex-wrap flex-start gap-2">
                       {attr.options.map(opt => (
                         <button 
                           key={opt}
                           onClick={() => setSelectedVariant({ ...selectedVariant, [attr.name]: opt })}
                           className={`variant-opt-btn ${selectedVariant[attr.name] === opt ? 'active' : ''}`}
-                          style={{
-                            padding: '8px 16px',
-                            borderRadius: '8px',
-                            background: selectedVariant[attr.name] === opt ? 'var(--accent-blue)' : 'rgba(255,255,255,0.05)',
-                            color: selectedVariant[attr.name] === opt ? 'white' : 'var(--text-secondary)',
-                            border: '1px solid',
-                            borderColor: selectedVariant[attr.name] === opt ? 'var(--accent-blue)' : 'rgba(255,255,255,0.1)',
-                            cursor: 'pointer',
-                            fontSize: '0.9rem',
-                            transition: 'all 0.2s'
-                          }}
                         >
                           {opt}
                         </button>
@@ -161,13 +150,10 @@ const ProductDetail: React.FC = () => {
               </div>
             )}
             
-            <div className="mt-6">
-              <h3 className="text-secondary mb-4" style={{fontSize: '1rem'}}>⚡ Hành động Săn Sale cùng Cộng Đồng</h3>
-              <div style={{display: 'flex', gap: 12, flexWrap: 'wrap'}}>
-                <button className="btn" style={{flex: 1, minWidth: 140, background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)'}} onClick={() => handleSaleAction('request')}>🙏 Nhờ Săn Hộ</button>
-                <button className="btn" style={{flex: 1, minWidth: 140, background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.3)'}} onClick={() => handleSaleAction('offer')}>🕵️ Đi Săn Hộ</button>
-                <button className="btn" style={{flex: 1, minWidth: 140, background: 'rgba(168, 85, 247, 0.1)', color: '#a855f7', border: '1px solid rgba(168, 85, 247, 0.3)'}} onClick={() => handleSaleAction('pass')}>💸 Pass Kèo Thơm</button>
-              </div>
+            <div className="community-actions">
+              <button className="btn btn-community btn-request" onClick={() => handleSaleAction('request')}>🙏 Nhờ Săn Hộ</button>
+              <button className="btn btn-community btn-offer" onClick={() => handleSaleAction('offer')}>🕵️ Đi Săn Hộ</button>
+              <button className="btn btn-community btn-pass" onClick={() => handleSaleAction('pass')}>💸 Pass Kèo Thơm</button>
             </div>
           </div>
         </div>
@@ -230,35 +216,35 @@ const ProductDetail: React.FC = () => {
               <div className="review-list-detailed">
                 {filteredReviews.length > 0 ? (
                   filteredReviews.map(review => (
-                    <div key={review.id} className="detail-review-card" style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px', background: 'var(--bg-card)', borderRadius: '12px', border: '1px solid var(--border-subtle)', marginBottom: '16px', flexWrap: 'wrap', gap: '16px'}}>
-                      <div className="reviewer-info-detailed" style={{flex: 1, minWidth: '250px'}}>
+                    <div key={review.id} className="detail-review-card">
+                      <div className="reviewer-info-detailed">
                         {review.type === 'reviewer' && review.reviewerProfile ? (
-                          <div className="reviewer-profile-detailed" style={{display: 'flex', alignItems: 'center', gap: '16px'}}>
-                            <img className="avatar" src={review.reviewerProfile.avatarUrl} alt={review.author} style={{width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover'}} />
+                          <Link to={`/reviewer/${review.reviewer_id}`} className="reviewer-profile-detailed link-hover">
+                            <img className="avatar" src={review.reviewerProfile.avatarUrl} alt={review.author} />
                             <div className="meta">
-                              <span className="name" style={{fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)'}}>{review.author}</span>
-                              <div className="social" style={{marginTop: '6px', fontSize: '0.95rem', color: 'var(--text-secondary)'}}>
+                              <span className="name">{review.author}</span>
+                              <div className="social">
                                 Đã có bài đánh giá chi tiết
                               </div>
                             </div>
-                          </div>
+                          </Link>
                         ) : (
-                          <span className="user-name" style={{fontSize: '1.1rem', fontWeight: 600}}>{review.author}</span>
+                          <span className="reviewer-user-name">{review.author}</span>
                         )}
                       </div>
                       
                       {review.type === 'user' ? (
-                        <div style={{flexBasis: '100%'}}>
-                          <p className="content" style={{fontSize: '1.05rem', lineHeight: 1.6}}>{review.content}</p>
+                        <div className="flex-1">
+                          <p className="review-content-text">{review.content}</p>
                           {review.screenshotUrl && (
-                            <div className="media-preview" onClick={() => { setModalType('screenshot'); setModalContent(review.screenshotUrl || null); }} style={{marginTop: '12px', cursor: 'pointer', maxWidth: '120px'}}>
-                              <img src={review.screenshotUrl} alt="Review proof" style={{width: '100%', borderRadius: '8px'}}/>
+                            <div className="review-media-preview" onClick={() => { setModalType('screenshot'); setModalContent(review.screenshotUrl || null); }}>
+                              <img src={review.screenshotUrl} alt="Review proof" />
                             </div>
                           )}
                         </div>
                       ) : (
-                        <div className="review-action" style={{flexShrink: 0}}>
-                          <a href={review.postUrl || review.reviewerProfile?.youtubeUrl || '#'} target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px', borderRadius: '10px', fontWeight: 600, fontSize: '1.05rem'}}>
+                        <div className="review-action-container">
+                          <a href={review.postUrl || review.reviewerProfile?.youtubeUrl || '#'} target="_blank" rel="noopener noreferrer" className="btn btn-primary review-action-btn">
                             {review.postUrl ? '📄 Xem Bài Viết' : '▶️ Xem Video'}
                           </a>
                         </div>
@@ -282,24 +268,24 @@ const ProductDetail: React.FC = () => {
               {showComments && (
                 <div className="comment-form-detailed">
                   {!user && (
-                    <div className="input-row" style={{marginBottom: 12}}>
+                    <div className="input-row mb-3">
                       <input type="text" className="premium-input" placeholder="Biệt danh..." value={nickname} onChange={e => setNickname(e.target.value)} />
                     </div>
                   )}
                   <div className="input-row">
-                    <textarea className="premium-input" style={{flex: 1, minHeight: 80, resize: 'vertical'}} placeholder={user ? `Đăng bình luận với tư cách ${user.user_metadata?.full_name || user.email}...` : "Bạn nghĩ gì về sản phẩm này?"} value={comment} onChange={e => setComment(e.target.value)} />
-                    <button className="btn btn-primary" style={{alignSelf: 'flex-start'}} onClick={handleAddComment} disabled={!comment.trim()}>Gửi</button>
+                    <textarea className="premium-input comment-textarea" placeholder={user ? `Đăng bình luận với tư cách ${user.user_metadata?.full_name || user.email}...` : "Bạn nghĩ gì về sản phẩm này?"} value={comment} onChange={e => setComment(e.target.value)} />
+                    <button className="btn btn-primary comment-submit-btn" onClick={handleAddComment} disabled={!comment.trim()}>Gửi</button>
                   </div>
                 </div>
               )}
 
               <div className="comment-list-detailed">
                 {comments.map(c => (
-                  <div key={c.id} className="comment-box" style={{display: 'flex', gap: '16px', padding: '16px', background: 'var(--bg-card)', borderRadius: '12px', border: '1px solid var(--border-subtle)', marginBottom: '12px'}}>
+                  <div key={c.id} className="comment-box">
                     {c.profiles?.avatar_url ? (
-                      <img src={c.profiles.avatar_url} alt={c.profiles.full_name} style={{width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover'}} />
+                      <img src={c.profiles.avatar_url} alt={c.profiles.full_name} className="comment-avatar" />
                     ) : (
-                      <div className="avatar" style={{width: '40px', height: '40px', borderRadius: '50%', background: 'var(--accent-blue)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold'}}>
+                      <div className="comment-avatar-fallback">
                         {c.nickname.charAt(0).toUpperCase()}
                       </div>
                     )}

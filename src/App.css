@@ -89,18 +89,23 @@ h1, h2, h3, h4, h5, h6 {
 .mt-4 { margin-top: 16px; }
 .mt-6 { margin-top: 24px; }
 .mt-8 { margin-top: 32px; }
-.mb-2 { margin-bottom: 8px; }
-.mb-4 { margin-bottom: 16px; }
-.mb-6 { margin-bottom: 24px; }
 .mb-8 { margin-bottom: 32px; }
+.ml-2 { margin-left: 8px; }
+.p-2 { padding: 8px; }
+.p-4 { padding: 16px; }
+.rounded { border-radius: var(--radius-md); }
+.bg-deep-light { background: rgba(255, 255, 255, 0.03); }
+.border-glass { border: 1px solid var(--border-subtle); }
+.text-xs { font-size: 0.8rem; }
+.btn-xs { padding: 2px 8px; font-size: 0.75rem; }
 
 /* Header & Footer */
 .app-header {
   position: sticky;
   top: 0;
   z-index: 50;
-  backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
   background: rgba(10, 10, 10, 0.7);
   border-bottom: 1px solid var(--border-subtle);
 }

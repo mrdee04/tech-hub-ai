@@ -123,6 +123,7 @@ alter table public.reviews add column if not exists content text;
 alter table public.reviews add column if not exists rating numeric default 0;
 alter table public.reviews add column if not exists type text;
 alter table public.reviews add column if not exists "reviewerProfile" jsonb;
+alter table public.reviews add column if not exists "reviewer_id" uuid references public.reviewers(id) on delete set null;
 alter table public.reviews add column if not exists "screenshotUrl" text;
 alter table public.reviews add column if not exists "postUrl" text;
 alter table public.reviews add column if not exists created_at timestamp with time zone default now();

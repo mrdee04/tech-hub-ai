@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
+import './ProductCard.css';
 
 export interface ReviewerProfile {
   avatarUrl?: string;
@@ -15,6 +16,7 @@ export interface Review {
   content: string;
   rating: number;
   created_at: string;
+  reviewer_id?: string;
   reviewerProfile?: ReviewerProfile;
   screenshotUrl?: string;
   postUrl?: string;
@@ -100,18 +102,18 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
 
   return (
     <>
-      <div className="post-card" style={{position: 'relative', overflow: 'hidden'}}>
+      <div className="post-card product-card-container">
         {product.status && (
-          <div style={{position: 'absolute', top: 12, right: 12, zIndex: 10}} className={`badge ${product.status === 'hot' ? 'badge-request' : product.status === 'new' ? 'badge-offer' : 'badge-pass'}`}>
+          <div className={`badge product-status-badge ${product.status === 'hot' ? 'badge-request' : product.status === 'new' ? 'badge-offer' : 'badge-pass'}`}>
             {product.status === 'hot' ? '🔥 HOT' : 
              product.status === 'new' ? '✨ MỚI' : '🏆 BÁN CHẠY'}
           </div>
         )}
         
-        <Link to={`/product/${product.id}`} style={{ display: 'block' }}>
-          <div style={{width: '100%', aspectRatio: '4/3', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-card)', borderRadius: '12px', marginBottom: '16px', position: 'relative', overflow: 'hidden'}}>
-            <img src={product.imageUrl} alt={product.name} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
-            <div style={{position: 'absolute', bottom: 8, left: 8, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)', color: 'white', border: '1px solid rgba(255,255,255,0.1)'}} className="badge">
+        <Link to={`/product/${product.id}`} className="display-block">
+          <div className="product-image-wrapper">
+            <img src={product.imageUrl} alt={product.name} />
+            <div className="badge category-badge-overlay">
               {product.category.toLowerCase() === 'phone' ? 'Điện thoại' :
                product.category.toLowerCase() === 'laptop' ? 'Laptop' :
                product.category.toLowerCase() === 'tablet' ? 'Máy tính bảng' :
@@ -121,18 +123,18 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
           </div>
         </Link>
         
-        <div className="flex-column gap-2" style={{flex: 1}}>
-          <Link to={`/product/${product.id}`} style={{ textDecoration: 'none' }}>
-            <h3 style={{fontSize: '1.05rem', lineHeight: 1.4, margin: 0}} className="text-primary product-name-hover">{product.name}</h3>
+        <div className="flex-column gap-2 flex-1">
+          <Link to={`/product/${product.id}`} className="text-decoration-none">
+            <h3 className="text-primary product-name-hover product-name-title">{product.name}</h3>
           </Link>
 
           {/* VARIANT SELECTOR */}
           {product.variants?.attributes && product.variants.attributes.length > 0 && (
             <div className="flex-column gap-2 mt-2">
               {product.variants.attributes.map(attr => (
-                <div key={attr.name} className="flex-center" style={{ justifyContent: 'flex-start', gap: '8px', flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', minWidth: '60px' }}>{attr.name}</span>
-                  <div className="flex-center" style={{ gap: '4px', flexWrap: 'wrap' }}>
+                <div key={attr.name} className="flex-center variant-row-mini">
+                  <span className="variant-label-mini">{attr.name}</span>
+                  <div className="flex-center variant-options-mini">
                     {attr.options.map(opt => (
                       <button 
                         key={opt}
@@ -140,16 +142,7 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
                           e.preventDefault();
                           setSelectedVariant({ ...selectedVariant, [attr.name]: opt });
                         }}
-                        style={{ 
-                          padding: '2px 8px', 
-                          fontSize: '0.75rem', 
-                          borderRadius: '6px',
-                          border: '1px solid',
-                          borderColor: selectedVariant[attr.name] === opt ? 'var(--accent-blue)' : 'var(--border-subtle)',
-                          background: selectedVariant[attr.name] === opt ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
-                          color: selectedVariant[attr.name] === opt ? 'var(--accent-blue)' : 'var(--text-secondary)',
-                          cursor: 'pointer'
-                        }}
+                        className={`variant-opt-btn-mini ${selectedVariant[attr.name] === opt ? 'active' : ''}`}
                       >
                         {opt}
                       </button>
@@ -160,27 +153,26 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
             </div>
           )}
           
-          <div className="flex-center" style={{justifyContent: 'flex-start', gap: '6px', fontSize: '0.85rem'}}>
-            <span style={{color: 'var(--accent-green)'}}>🔥 {product.salePostCount || 0} Kèo Săn</span>
-            <Link to={`/product/${product.id}`} className="text-secondary" style={{marginLeft: 'auto', fontSize: '0.8rem', textDecoration: 'underline'}}>Chi tiết</Link>
+          <div className="flex-center stats-row-mini">
+            <span className="stats-label-sale">🔥 {product.salePostCount || 0} Kèo Săn</span>
+            <Link to={`/product/${product.id}`} className="text-secondary stats-detail-link">Chi tiết</Link>
           </div>
 
-          <div className="flex-column mt-2" style={{marginBottom: '16px'}}>
-            <span className="text-muted" style={{fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em'}}>
+          <div className="flex-column mt-2 mb-4">
+            <span className="text-muted price-label-mini">
               {currentVariantPrice ? 'Giá Biến Thể' : 'Giá Đáy Thấp Nhất'}
             </span>
             {isPriceDefined ? (
-              <span className="text-gradient" style={{fontSize: '1.3rem', fontWeight: 800}}>
+              <span className="text-gradient price-value-mini">
                 {typeof displayPrice === 'number' 
                   ? displayPrice.toLocaleString('vi-VN') 
                   : Number(displayPrice.toString().replace(/[^0-9.-]+/g,"")).toLocaleString('vi-VN')} đ
               </span>
             ) : (
               <div className="flex-column gap-2">
-                <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontStyle: 'italic' }}>Chưa xác định, mời bạn bắt đáy</span>
+                <span className="price-empty-mini">Chưa xác định, mời bạn bắt đáy</span>
                 <button 
-                  className="btn-primary" 
-                  style={{ padding: '6px 12px', fontSize: '0.85rem', width: 'fit-content' }}
+                  className="btn-primary btn-report-mini"
                   onClick={(e) => {
                     e.preventDefault();
                     if (!user) {
@@ -197,21 +189,22 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
             )}
           </div>
           
-          <div className="post-card-author" style={{marginTop: 'auto'}}>
-            <div className="flex-center" style={{justifyContent: 'flex-start'}}>
+          <div className="post-card-author">
+            <div className="reviewer-avatars-list">
               {reviewers.slice(0, 3).map(r => (
+                <Link key={r.id} to={`/reviewer/${r.reviewer_id}`} onClick={e => e.stopPropagation()}>
                   <img 
-                    key={r.id} 
-                    style={{width: 24, height: 24, borderRadius: '50%', border: '2px solid var(--bg-card)', marginLeft: -6, background: '#333'}}
+                    className="reviewer-mini-avatar"
                     title={r.author}
                     src={r.reviewerProfile?.avatarUrl || 'https://via.placeholder.com/20'}
                     alt={r.author}
                   />
+                </Link>
               ))}
-              {reviewers.length > 3 && <span className="text-muted" style={{fontSize: '0.75rem', marginLeft: 6}}>+{reviewers.length - 3}</span>}
-              {reviewers.length === 0 && <span className="text-muted" style={{fontSize: '0.75rem'}}>Chưa có reviewer</span>}
+              {reviewers.length > 3 && <span className="text-muted text-xs ml-1">+{reviewers.length - 3}</span>}
+              {reviewers.length === 0 && <span className="text-muted text-xs">Chưa có reviewer</span>}
             </div>
-            <span className="text-muted" style={{fontSize: '0.75rem', marginLeft: 'auto'}}>({product.reviewCount} đánh giá)</span>
+            <span className="text-muted text-xs ml-auto">({product.reviewCount} đánh giá)</span>
           </div>
         </div>
       </div>
@@ -232,21 +225,16 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
 // For now, I'll assume we want a separate file for cleanliness.
 const BottomPriceReportModal: React.FC<any> = ({ product, selectedVariant, user, onClose }) => {
   return (
-    <div className="modal-overlay" style={{
-      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
-      background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000,
-      padding: '20px'
-    }}>
-      <div className="glass-card" style={{ maxWidth: '500px', width: '100%', padding: '32px' }}>
+    <div className="modal-overlay">
+      <div className="glass-card report-modal-card">
         <div className="flex-between mb-4">
-          <h2 style={{ margin: 0 }}>Báo giá đáy</h2>
-          <button className="btn" onClick={onClose} style={{ padding: '4px 12px' }}> đóng</button>
+          <h2 className="report-modal-header">Báo giá đáy</h2>
+          <button className="btn report-modal-close" onClick={onClose}> đóng</button>
         </div>
         
         <div className="mb-4">
-          <div style={{ fontWeight: 600, color: 'var(--accent-blue)' }}>{product.name}</div>
-          <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+          <div className="product-info-label">{product.name}</div>
+          <div className="product-info-variants">
             {Object.entries(selectedVariant).map(([k,v]) => `${k}: ${v}`).join(' | ')}
           </div>
         </div>
@@ -298,19 +286,12 @@ const BottomPriceReportModal: React.FC<any> = ({ product, selectedVariant, user,
           <div className="input-group">
             <label className="premium-label">Link ảnh chụp màn hình đơn hàng (Nhiều nhất có thể)</label>
             <input name="screenshot" type="text" placeholder="https://imgur.com/..." className="premium-input" />
-            <small className="text-muted" style={{ fontSize: '0.75rem', marginTop: '4px' }}>
+            <small className="text-muted text-xs mt-1">
               Hãy upload ảnh lên Imgur hoặc các trang hosting ảnh rồi dán link vào đây.
             </small>
           </div>
 
-          <div className="alert-info" style={{ 
-            padding: '12px', 
-            background: 'rgba(59, 130, 246, 0.1)', 
-            borderRadius: '8px',
-            fontSize: '0.85rem',
-            color: 'var(--accent-blue)',
-            border: '1px solid rgba(59, 130, 246, 0.2)'
-          }}>
+          <div className="report-note">
             📍 Lưu ý: Ảnh chụp màn hình phải rõ ràng giá và mã đơn hàng đã thanh toán thành công.
           </div>
 

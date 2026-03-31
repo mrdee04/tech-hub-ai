@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { fetchGlobalBanner, type BannerItem } from '../services/settingsService';
 import { useLocation } from 'react-router-dom';
+import './NotificationBanner.css';
 
 const NotificationBanner: React.FC = () => {
   const [activeItems, setActiveItems] = useState<BannerItem[]>([]);
@@ -61,125 +62,43 @@ const NotificationBanner: React.FC = () => {
   const currentBanner = activeItems[currentIndex];
 
   const bannerContent = (
-    <div 
-      className="container-width animate-fade-in" 
-      style={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        justifyContent: 'center',
-        gap: '32px',
-        padding: '32px 20px',
-        position: 'relative',
-        zIndex: 1
-      }}
-    >
+    <div className="banner-container container-width animate-fade-in">
       {/* Left Part: Full Visibility Alert (Fixed Dimensions) */}
       <div 
         key={currentBanner.id} 
+        className="banner-card"
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
-        style={{
-          width: '100%',
-          maxWidth: '520px',
-          height: '500px',
-          background: 'var(--bg-glass)',
-          borderRadius: '24px',
-          overflow: 'hidden',
-          position: 'relative',
-          border: '1px solid var(--border-glass)',
-          boxShadow: '0 16px 64px rgba(0,0,0,0.5)',
-          cursor: 'default',
-          flexShrink: 0,
-          display: 'flex',
-          flexDirection: 'column'
-        }}
       >
         {/* Unified Telegram Content Area (Scrollable) */}
-        <div style={{
-          flex: 1,
-          padding: '24px',
-          display: 'flex',
-          flexDirection: 'column',
-          minHeight: 0,
-          background: 'rgba(20, 20, 20, 0.4)',
-          overflowY: 'auto',
-          scrollbarWidth: 'thin',
-          scrollbarColor: 'var(--accent-primary) transparent'
-        }}>
-          <div style={{
-            borderLeft: '4px solid var(--accent-primary)',
-            background: 'rgba(139, 92, 246, 0.05)',
-            borderRadius: '0 12px 12px 0',
-            padding: '16px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '16px'
-          }}>
+        <div className="banner-content-scroll">
+          <div className="banner-alert-box">
             {/* Header */}
-            <div style={{ 
-              color: 'var(--accent-primary)', 
-              fontWeight: 800, 
-              fontSize: '0.9rem', 
-              textTransform: 'uppercase',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              flexShrink: 0
-            }}>
-              <span style={{ fontSize: '1.2rem' }}>🤖</span> TechHub Alert
+            <div className="banner-header">
+              <span>🤖</span> TechHub Alert
             </div>
 
             {/* Content: Image then Text */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div className="flex-column gap-4">
               {currentBanner.imageUrl && (
                 <div 
                   onClick={() => currentBanner.link && window.open(currentBanner.link, '_blank')}
-                  style={{ 
-                    width: '100%', 
-                    cursor: currentBanner.link ? 'pointer' : 'default',
-                    borderRadius: '12px',
-                    overflow: 'hidden',
-                    background: 'rgba(0,0,0,0.2)',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    minHeight: '100px',
-                    border: '1px solid rgba(255,255,255,0.05)'
-                  }}
+                  className={`banner-image-container ${currentBanner.link ? 'cursor-pointer' : 'cursor-default'}`}
                 >
                   <img 
                     src={currentBanner.imageUrl} 
                     alt="Promotion" 
-                    style={{ 
-                      maxWidth: '100%', 
-                      maxHeight: '320px', 
-                      objectFit: 'contain',
-                      transition: 'transform 0.4s ease',
-                      display: 'block'
-                    }} 
-                    onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
-                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                   />
                 </div>
               )}
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <div style={{ 
-                  fontWeight: 700,
-                  fontSize: '1.2rem',
-                  color: 'white',
-                  lineHeight: '1.4'
-                }}>
+              <div className="banner-text-content">
+                <div className="banner-title">
                   {currentBanner.text.split('\n')[0]}
                 </div>
                 <div 
-                  style={{ 
-                    fontSize: '1rem',
-                    lineHeight: '1.6',
-                    color: 'var(--text-secondary)',
-                    whiteSpace: 'pre-wrap',
-                    wordBreak: 'break-word'
-                  }} 
+                  className="banner-description" 
                   dangerouslySetInnerHTML={{ __html: currentBanner.text.includes('\n') ? currentBanner.text.split('\n').slice(1).join('<br/>') : '' }}
                 />
               </div>
@@ -190,15 +109,7 @@ const NotificationBanner: React.FC = () => {
                     e.stopPropagation();
                     window.open(currentBanner.link, '_blank');
                   }}
-                  style={{ 
-                    fontSize: '0.9rem', 
-                    color: '#3b82f6', 
-                    textDecoration: 'underline',
-                    cursor: 'pointer',
-                    wordBreak: 'break-all',
-                    display: 'block',
-                    fontWeight: 600
-                  }}
+                  className="banner-link"
                 >
                   Link: {currentBanner.link}
                 </div>
@@ -209,26 +120,12 @@ const NotificationBanner: React.FC = () => {
 
         {/* Carousel Indicators (Top Corner) */}
         {activeItems.length > 1 && (
-          <div style={{ 
-            display: 'flex', 
-            gap: '8px', 
-            position: 'absolute',
-            top: '20px',
-            right: '20px',
-            zIndex: 10,
-            background: 'rgba(0,0,0,0.5)',
-            padding: '6px 12px',
-            borderRadius: '20px',
-            backdropFilter: 'blur(8px)'
-          }}>
+          <div className="carousel-indicators">
             {activeItems.map((_, idx) => (
-              <div key={idx} style={{
-                width: idx === currentIndex ? '24px' : '8px', 
-                height: '8px', 
-                borderRadius: '4px', 
-                background: idx === currentIndex ? 'var(--accent-primary)' : 'rgba(255,255,255,0.4)',
-                transition: 'all 0.3s ease'
-              }}/>
+              <div 
+                key={idx} 
+                className={`indicator-dot ${idx === currentIndex ? 'active' : ''}`}
+              />
             ))}
           </div>
         )}
@@ -237,60 +134,16 @@ const NotificationBanner: React.FC = () => {
       {/* Right Part: Đăng Tin Bắt Kèo (Matching Dimensions) */}
       <div 
         onClick={() => window.location.href = '/sale-hunting/create'}
-        style={{
-          width: '100%',
-          maxWidth: '520px',
-          height: '500px',
-          background: 'rgba(255, 255, 255, 0.04)',
-          backdropFilter: 'blur(20px)',
-          borderRadius: '24px',
-          padding: '40px',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '32px',
-          cursor: 'pointer',
-          border: '1px solid var(--border-glass)',
-          boxShadow: '0 16px 64px rgba(0,0,0,0.3)',
-          transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-          textAlign: 'center',
-          flexShrink: 0
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'translateY(-10px)';
-          e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.5)';
-          e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'translateY(0)';
-          e.currentTarget.style.borderColor = 'var(--border-glass)';
-          e.currentTarget.style.background = 'rgba(255, 255, 255, 0.04)';
-        }}
+        className="banner-card interactive"
       >
-        <div style={{ 
-          fontSize: '7rem', 
-          filter: 'drop-shadow(0 0 30px rgba(139, 92, 246, 0.4))',
-          animation: 'bounce 2.5s infinite'
-        }}>🚀</div>
+        <div className="banner-rocket">🚀</div>
         <div>
-          <div style={{ fontWeight: 950, fontSize: '2.2rem', color: 'white', marginBottom: '12px' }}>Bắt Kèo Săn Sale</div>
-          <p style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', maxWidth: '350px', lineHeight: '1.7', opacity: 0.8 }}>
+          <div className="banner-title-large">Bắt Kèo Săn Sale</div>
+          <p className="banner-description banner-desc-muted">
             Cộng đồng săn sale chuyên nghiệp. Đăng tin bắt kèo, khớp kèo với nhau để săn đáy kỷ lục.
           </p>
         </div>
-        <div style={{
-          background: 'var(--accent-gradient)',
-          color: 'white',
-          padding: '20px 48px',
-          borderRadius: '20px',
-          fontSize: '1.25rem',
-          fontWeight: 1000,
-          whiteSpace: 'nowrap',
-          boxShadow: '0 12px 32px rgba(139, 92, 246, 0.6)',
-          width: '90%',
-          marginTop: '8px'
-        }}>
+        <div className="banner-cta-btn">
           ĐĂNG TIN BẮT KÈO 📝
         </div>
       </div>
@@ -298,19 +151,7 @@ const NotificationBanner: React.FC = () => {
   );
 
   return (
-    <div 
-      style={{ 
-        width: '100%', 
-        position: 'sticky', 
-        top: '72px', 
-        zIndex: 40,
-        background: 'var(--bg-glass)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        borderBottom: '1px solid var(--border-glass)',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
-      }}
-    >
+    <div className="banner-overlay">
       {bannerContent}
     </div>
   );

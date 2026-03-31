@@ -8,6 +8,7 @@ import ProductGrid from './components/ProductGrid';
 import ProductDetail from './components/ProductDetail';
 import NewsFeed from './components/NewsFeed';
 import AdminPanel from './components/AdminPanel';
+import ReviewerProfile from './components/ReviewerProfile';
 import CategoryTabs from './components/CategoryTabs';
 import NotificationBanner from './components/NotificationBanner';
 import './App.css';
@@ -55,10 +56,10 @@ function Header() {
           <div className="user-nav">
             <span className="btn btn-ghost" onClick={() => navigate('/profile')}>
               <span className="hide-on-mobile">{profile?.full_name || user.email}</span>
-              <span className="badge badge-neutral" style={{marginLeft: 8}}>★ {profile?.reputation_score || 0}</span>
+              <span className="badge badge-neutral ml-2">★ {profile?.reputation_score || 0}</span>
             </span>
             <button onClick={signOut} className="btn btn-secondary hide-on-mobile">Đăng xuất</button>
-            <button onClick={signOut} className="btn btn-secondary show-on-mobile" style={{padding: '8px'}} title="Đăng xuất">🚪</button>
+            <button onClick={signOut} className="btn btn-secondary show-on-mobile p-2" title="Đăng xuất">🚪</button>
           </div>
         ) : (
           <div className="user-nav">
@@ -82,6 +83,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/product/:id" element={<ProductDetail />} />
             <Route path="/admin" element={<AdminPanel />} />
+            <Route path="/reviewer/:id" element={<ReviewerProfile />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/sale-hunting/*" element={<SaleHunting />} />
             <Route path="/profile" element={<Profile />} />
@@ -90,7 +92,7 @@ function App() {
         <footer className="app-footer">
           <div className="container-width flex-column flex-center gap-2">
             <p>&copy; 2026 TechHub AI - Cải tiến liên tục vì cộng đồng</p>
-            <Link to="/admin" className="nav-link" style={{fontSize: '0.8rem'}}>Quản trị hệ thống</Link>
+            <Link to="/admin" className="nav-link text-xs">Quản trị hệ thống</Link>
           </div>
         </footer>
       </div>

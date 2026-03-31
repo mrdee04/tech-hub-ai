@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import type { Product, Review } from './ProductCard';
+import type { Product } from './ProductCard';
 import { fetchProducts, addProduct, deleteProduct, updateProduct } from '../services/productService';
-import { fetchAllSalePostsForAdmin, deleteSalePost as deletePostApi, updateSalePost, checkAndAutoConfirmPosts } from '../services/saleHuntingService';
+import { fetchAllSalePostsForAdmin, deleteSalePost as deletePostApi, checkAndAutoConfirmPosts } from '../services/saleHuntingService';
 import type { SalePost } from '../services/saleHuntingService';
 import type { GlobalBannerData, BannerItem } from '../services/settingsService';
-import { fetchAllUsers, fetchAllReviews, updateReview, deleteReview, updateUser, type UserProfile, type ReviewWithProduct } from '../services/adminService';
+import { fetchAllUsers, fetchAllReviews, deleteReview, updateUser, type UserProfile, type ReviewWithProduct } from '../services/adminService';
 import { fetchReviewers, addReviewer, updateReviewer, deleteReviewer, type Reviewer } from '../services/reviewerService';
 import { supabase } from '../supabaseClient';
 import { CATEGORIES } from './CategoryTabs';
 import { fetchAllReportsForAdmin, updateReportStatus, type BottomPriceReport } from '../services/bottomPriceService';
+import { addReview as addReviewApi } from '../services/reviewService';
 import './AdminPanel.css';
 
 const AdminPanel: React.FC = () => {
@@ -30,7 +31,7 @@ const AdminPanel: React.FC = () => {
   // Editing states
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isEditingProduct, setIsEditingProduct] = useState(false);
-  const [editingReview, setEditingReview] = useState<ReviewWithProduct | null>(null);
+
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
   const [isEditingUser, setIsEditingUser] = useState(false);
   const [editingReviewer, setEditingReviewer] = useState<Reviewer | null>(null);
@@ -39,27 +40,24 @@ const AdminPanel: React.FC = () => {
   // Modals & Sub-views
   const [selectedProductForReviews, setSelectedProductForReviews] = useState<Product | null>(null);
 
+  const [isAddingReview, setIsAddingReview] = useState(false);
+  const [newReview, setNewReview] = useState<any>({
+    author: '', content: '', rating: 5, type: 'user', reviewer_id: '', screenshotUrl: '', postUrl: ''
+  });
   // Filters
-  const [searchProductQuery, setSearchProductQuery] = useState('');
-  const [filterCategory, setFilterCategory] = useState('all');
+  const [searchProductQuery] = useState('');
+  const [filterCategory] = useState('all');
 
   // New item states
   const [newProduct, setNewProduct] = useState<Partial<Product>>({
     name: '', imageUrl: '', bottomPrice: '', rating: 5, category: 'phone', shops: [{ name: 'Shopee', url: '' }]
   });
-
-  const [newReview, setNewReview] = useState<Partial<Review>>({
-    type: 'reviewer', author: '', content: '', rating: 5,
-    reviewerProfile: { avatarUrl: '', facebookUrl: '', youtubeUrl: '' },
-    screenshotUrl: '', postUrl: ''
-  });
-
   const [newReviewer, setNewReviewer] = useState<Partial<Reviewer>>({
     name: '', avatar_url: '', facebook_url: '', youtube_url: ''
   });
 
   const [bannerConfig, setBannerConfig] = useState<GlobalBannerData>({ enabled: false, items: [] });
-  const [editingBannerItem, setEditingBannerItem] = useState<Partial<BannerItem>>({ id: '', isActive: true, text: '', link: '', imageUrl: '' });
+  const [editingBannerItem, setEditingBannerItem] = useState<Partial<BannerItem> | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => setSession(session));
@@ -222,33 +220,40 @@ const AdminPanel: React.FC = () => {
     });
   };
 
-  const extractReviewerProfileProps = (reviewerName: string) => {
-    const found = reviewers.find(r => r.name === reviewerName);
-    if (found) {
-      return {
-        avatarUrl: found.avatar_url,
-        facebookUrl: found.facebook_url,
-        youtubeUrl: found.youtube_url
-      };
-    }
-    return { avatarUrl: '', facebookUrl: '', youtubeUrl: '' };
-  };
 
-  const handleUpdateReviewSubmit = async (e: React.FormEvent) => {
+
+
+  const handleAddReview = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editingReview) return;
-    const { id, product_id, products, ...updates } = editingReview as any;
-    
-    if (updates.type === 'reviewer') {
-      updates.reviewerProfile = extractReviewerProfileProps(updates.author);
+    if (!selectedProductForReviews) return;
+
+    const reviewData = {
+      ...newReview,
+      product_id: selectedProductForReviews.id,
+      rating: Number(newReview.rating)
+    };
+
+    if (reviewData.type === 'reviewer' && reviewData.reviewer_id) {
+       const rev = reviewers.find(r => r.id === reviewData.reviewer_id);
+       if (rev) {
+         reviewData.author = rev.name;
+         reviewData.reviewerProfile = {
+           avatarUrl: rev.avatar_url,
+           facebookUrl: rev.facebook_url,
+           youtubeUrl: rev.youtube_url
+         };
+       }
     }
-    
-    const success = await updateReview(id, updates);
-    if (success) {
-      alert('Cập nhật đánh giá thành công!');
-      setEditingReview(null);
+
+    const result = await addReviewApi(reviewData);
+    if (result) {
+      alert('Thêm đánh giá thành công!');
+      setIsAddingReview(false);
+      setNewReview({ author: '', content: '', rating: 5, type: 'user', reviewer_id: '', screenshotUrl: '', postUrl: '' });
       loadReviews();
-    } else alert('Lỗi khi cập nhật.');
+    } else {
+      alert('Lỗi khi thêm đánh giá.');
+    }
   };
 
   const handleDeleteReview = async (id: string) => {
@@ -509,9 +514,14 @@ const AdminPanel: React.FC = () => {
                 <h2>⭐ Đánh giá: {selectedProductForReviews.name}</h2>
                 <p className="text-secondary">Quản lý các nhận xét từ Reviewers và người dùng cho sản phẩm này.</p>
               </div>
-              <button className="btn-admin btn-admin-secondary" onClick={() => setSelectedProductForReviews(null)}>
-                ← Quay lại
-              </button>
+              <div className="flex-center gap-2">
+                <button className="btn-admin btn-admin-primary" onClick={() => setIsAddingReview(true)}>
+                  + Thêm đánh giá
+                </button>
+                <button className="btn-admin btn-admin-secondary" onClick={() => setSelectedProductForReviews(null)}>
+                  ← Quay lại
+                </button>
+              </div>
             </header>
             
             <div className="admin-table-container">
@@ -784,18 +794,128 @@ const AdminPanel: React.FC = () => {
       </main>
 
       {/* OVERLAY MODALS FOR EDITING */}
-      {(isEditingProduct || isEditingReviewer || isEditingUser) && (
+      {(isEditingProduct || isEditingReviewer || isEditingUser || isAddingReview || editingBannerItem) && (
         <div className="modal-overlay" onClick={() => {
             setIsEditingProduct(false);
             setIsEditingReviewer(false);
             setIsEditingUser(false);
-            setEditingBannerItem({ id: '', isActive: true, text: '', link: '', imageUrl: '' });
+            setIsAddingReview(false);
+            setEditingBannerItem(null);
           }}>
           <div className="admin-card modal-content" onClick={e => e.stopPropagation()}>
-             <h3>{isEditingProduct ? (editingProduct ? 'Sửa Sản Phẩm' : 'Thêm Sản Phẩm') : isEditingReviewer ? 'Quản lý Reviewer' : 'Quản lý Thành Viên'}</h3>
+             <h3>
+                {isEditingProduct ? (editingProduct ? 'Sửa Sản Phẩm' : 'Thêm Sản Phẩm') : 
+                 isEditingReviewer ? 'Quản lý Reviewer' : 
+                 isEditingUser ? 'Quản lý Thành Viên' : 
+                 isAddingReview ? 'Thêm Đánh Giá' : 
+                 'Chỉnh sửa Banner'}
+              </h3>
              <p className="text-secondary mb-4">Vui lòng nhập đầy đủ thông tin bên dưới.</p>
              
              <div className="flex-column gap-4">
+                {isAddingReview && (
+                  <form onSubmit={handleAddReview} className="flex-column gap-4">
+                    <div className="input-group flex-column gap-2">
+                      <label className="text-sm font-semibold text-secondary">LOẠI ĐÁNH GIÁ</label>
+                      <select 
+                        title="Loại đánh giá"
+                        className="input-field" 
+                        value={newReview.type} 
+                        onChange={e => setNewReview({ ...newReview, type: e.target.value as any, reviewer_id: '', author: '' })}
+                      >
+                        <option value="user">Người dùng</option>
+                        <option value="reviewer">Reviewer / KOL</option>
+                      </select>
+                    </div>
+
+                    {newReview.type === 'reviewer' ? (
+                      <div className="input-group flex-column gap-2">
+                        <label className="text-sm font-semibold text-secondary">CHỌN REVIEWER</label>
+                        <select 
+                          title="Chọn Reviewer"
+                          className="input-field" 
+                          value={newReview.reviewer_id} 
+                          onChange={e => setNewReview({ ...newReview, reviewer_id: e.target.value })}
+                          required
+                        >
+                          <option value="">-- Chọn Reviewer --</option>
+                          {reviewers.map(r => (
+                            <option key={r.id} value={r.id}>{r.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                    ) : (
+                      <div className="input-group flex-column gap-2">
+                        <label className="text-sm font-semibold text-secondary">TÊN NGƯỜI DÙNG</label>
+                        <input 
+                          type="text" 
+                          placeholder="Nguyễn Văn A" 
+                          value={newReview.author} 
+                          onChange={e => setNewReview({ ...newReview, author: e.target.value })} 
+                          required 
+                          className="input-field" 
+                        />
+                      </div>
+                    )}
+
+                    <div className="input-group flex-column gap-2">
+                      <label className="text-sm font-semibold text-secondary">ĐIỂM ĐÁNH GIÁ (1-5)</label>
+                      <input 
+                        title="Điểm đánh giá"
+                        type="number" 
+                        step="0.1" 
+                        min="1" 
+                        max="5" 
+                        value={newReview.rating} 
+                        onChange={e => setNewReview({ ...newReview, rating: e.target.value })} 
+                        required 
+                        className="input-field" 
+                      />
+                    </div>
+
+                    <div className="input-group flex-column gap-2">
+                      <label className="text-sm font-semibold text-secondary">NỘI DUNG ĐÁNH GIÁ</label>
+                      <textarea 
+                        placeholder="Nội dung đánh giá chi tiết..." 
+                        value={newReview.content} 
+                        onChange={e => setNewReview({ ...newReview, content: e.target.value })} 
+                        required 
+                        className="input-field min-h-100" 
+                      />
+                    </div>
+
+                    {newReview.type === 'reviewer' && (
+                      <>
+                        <div className="input-group flex-column gap-2">
+                          <label className="text-sm font-semibold text-secondary">LINK BÀI VIẾT / VIDEO</label>
+                          <input 
+                            type="url" 
+                            placeholder="https://youtube.com/..." 
+                            value={newReview.postUrl} 
+                            onChange={e => setNewReview({ ...newReview, postUrl: e.target.value })} 
+                            className="input-field" 
+                          />
+                        </div>
+                        <div className="input-group flex-column gap-2">
+                          <label className="text-sm font-semibold text-secondary">LINK ẢNH CHỤP MÀN HÌNH</label>
+                          <input 
+                            type="url" 
+                            placeholder="https://..." 
+                            value={newReview.screenshotUrl} 
+                            onChange={e => setNewReview({ ...newReview, screenshotUrl: e.target.value })} 
+                            className="input-field" 
+                          />
+                        </div>
+                      </>
+                    )}
+
+                    <div className="flex-center gap-4 mt-4">
+                      <button type="button" className="btn-admin btn-admin-secondary flex-1 p-4" onClick={() => setIsAddingReview(false)}>Hủy</button>
+                      <button type="submit" className="btn-admin btn-admin-primary flex-1 p-4">Lưu Đánh Giá</button>
+                    </div>
+                  </form>
+                )}
+
                 {isEditingProduct && (
                   <form onSubmit={editingProduct ? handleUpdateProduct : handleAddProduct} className="flex-column gap-4">
                     <div className="grid-settings gap-3">
@@ -825,7 +945,7 @@ const AdminPanel: React.FC = () => {
                     <div className="admin-card-inner">
                       <div className="flex-between mb-2">
                         <label className="text-sm font-semibold text-secondary">CÁC SHOP ĐANG BÁN</label>
-                        <button type="button" className="btn-admin btn-admin-secondary" style={{ padding: '2px 8px', fontSize: '0.75rem' }} onClick={() => {
+                        <button type="button" className="btn-admin btn-admin-secondary btn-xs" onClick={() => {
                           const currentShops = editingProduct ? [...(editingProduct.shops || [])] : [...(newProduct.shops || [])];
                           currentShops.push({ name: 'Shopee', url: '' });
                           editingProduct ? setEditingProduct({...editingProduct, shops: currentShops}) : setNewProduct({...newProduct, shops: currentShops});

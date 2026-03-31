@@ -1,0 +1,209 @@
+/* Notification Banner Premium Styles */
+.banner-overlay {
+  width: 100%;
+  position: sticky;
+  top: 72px;
+  z-index: 40;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  background: var(--bg-glass);
+  border-bottom: 1px solid var(--border-glass);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
+.banner-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 32px;
+  padding: 32px 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.banner-card {
+  width: 100%;
+  max-width: 520px;
+  height: 500px;
+  background: var(--bg-glass);
+  border-radius: 24px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid var(--border-glass);
+  box-shadow: 0 16px 64px rgba(0,0,0,0.5);
+  cursor: default;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.banner-card.interactive {
+  background: rgba(255, 255, 255, 0.04);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  padding: 40px;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  text-align: center;
+}
+
+.banner-card.interactive:hover {
+  transform: translateY(-10px);
+  border-color: rgba(139, 92, 246, 0.5);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.banner-content-scroll {
+  flex: 1;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: rgba(20, 20, 20, 0.4);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent-primary) transparent;
+}
+
+.banner-alert-box {
+  border-left: 4px solid var(--accent-primary);
+  background: rgba(139, 92, 246, 0.05);
+  border-radius: 0 12px 12px 0;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.banner-header {
+  color: var(--accent-primary);
+  font-weight: 800;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.banner-image-container {
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(0,0,0,0.2);
+  display: flex;
+  justify-content: center;
+  min-height: 100px;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.banner-image-container img {
+  max-width: 100%;
+  max-height: 320px;
+  object-fit: contain;
+  transition: transform 0.4s ease;
+  display: block;
+}
+
+.banner-image-container:hover img {
+  transform: scale(1.02);
+}
+
+.banner-text-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.banner-title {
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: white;
+  line-height: 1.4;
+}
+
+.banner-description {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.banner-link {
+  font-size: 0.9rem;
+  color: #3b82f6;
+  text-decoration: underline;
+  cursor: pointer;
+  word-break: break-all;
+  display: block;
+  font-weight: 600;
+}
+
+.carousel-indicators {
+  display: flex;
+  gap: 8px;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 10;
+  background: rgba(0,0,0,0.5);
+  padding: 6px 12px;
+  border-radius: 20px;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+.indicator-dot {
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.4);
+  transition: all 0.3s ease;
+}
+
+.indicator-dot.active {
+  width: 24px;
+  background: var(--accent-primary);
+}
+
+.banner-rocket {
+  font-size: 7rem;
+  filter: drop-shadow(0 0 30px rgba(139, 92, 246, 0.4));
+  animation: bounce 2.5s infinite;
+}
+
+.banner-cta-btn {
+  background: var(--accent-gradient);
+  color: white;
+  padding: 20px 48px;
+  border-radius: 20px;
+  font-size: 1.25rem;
+  font-weight: 1000;
+  white-space: nowrap;
+  box-shadow: 0 12px 32px rgba(139, 92, 246, 0.6);
+  width: 90%;
+  margin-top: 8px;
+}
+
+.banner-title-large {
+  font-weight: 950;
+  font-size: 2.2rem;
+  color: white;
+  margin-bottom: 12px;
+}
+
+.banner-desc-muted {
+  max-width: 350px;
+  opacity: 0.8;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.cursor-default {
+  cursor: default;
+}
