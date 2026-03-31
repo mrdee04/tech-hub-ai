@@ -14,18 +14,9 @@ import './App.css';
 
 function Home() {
   const [selectedCategory, setSelectedCategory] = useState('Tất cả');
-  const navigate = useNavigate();
 
   return (
     <main className="container-width flex-column gap-8 mt-8 mb-8">
-      {/* Sale Hunting Banner */}
-      <div className="premium-card flex-between" style={{cursor: 'pointer'}} onClick={() => navigate('/sale-hunting')}>
-        <div>
-          <h2 className="text-gradient" style={{fontSize: '2rem', marginBottom: 8}}>🎯 Bắt Kèo Săn Sale</h2>
-          <p className="text-secondary">Cộng đồng săn sale chuyên nghiệp. Nhờ săn hộ - Đi săn hộ - Pass kèo thơm.</p>
-        </div>
-        <button className="btn btn-primary">Khám phá ngay</button>
-      </div>
 
       <section className="flex-column gap-6">
         <CategoryTabs 
