@@ -693,3 +693,65 @@
 .comment-submit-btn {
   align-self: flex-start;
 }
+
+/* User Review Actions & Form */
+.user-review-actions {
+  display: flex;
+  flex-direction: column;
+}
+
+.review-form-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border-focus);
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.rating-selector {
+  display: flex;
+  gap: 8px;
+}
+
+.star-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.8rem;
+  color: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0;
+  line-height: 1;
+}
+
+.star-btn:hover {
+  transform: scale(1.2);
+}
+
+.star-btn.active {
+  color: var(--accent-yellow);
+  text-shadow: 0 0 10px rgba(255, 191, 0, 0.4);
+}
+
+.premium-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.min-h-100 {
+  min-height: 100px;
+}

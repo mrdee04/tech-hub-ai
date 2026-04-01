@@ -227,11 +227,16 @@ const AdminPanel: React.FC = () => {
     e.preventDefault();
     if (!selectedProductForReviews) return;
 
-    const reviewData = {
+    const reviewData: any = {
       ...newReview,
       product_id: selectedProductForReviews.id,
       rating: Number(newReview.rating)
     };
+
+    // Clean up empty strings for optional fields to avoid database errors
+    if (!reviewData.reviewer_id) delete reviewData.reviewer_id;
+    if (!reviewData.screenshotUrl) delete reviewData.screenshotUrl;
+    if (!reviewData.postUrl) delete reviewData.postUrl;
 
     if (reviewData.type === 'reviewer' && reviewData.reviewer_id) {
        const rev = reviewers.find(r => r.id === reviewData.reviewer_id);

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { fetchProductById } from '../services/productService';
 import { fetchComments, addComment } from '../services/commentService';
+import { addReview } from '../services/reviewService';
 import type { Product, Comment } from './ProductCard';
 import { useAuth } from './AuthContext';
 import './ProductDetail.css';
@@ -22,6 +23,15 @@ const ProductDetail: React.FC = () => {
   const [modalType, setModalType] = useState<'proof' | 'screenshot' | null>(null);
   const [modalContent, setModalContent] = useState<string | null>(null);
   const [selectedVariant, setSelectedVariant] = useState<Record<string, string>>({});
+  
+  // Review form state
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [newReview, setNewReview] = useState({
+    rating: 5,
+    content: '',
+    screenshotUrl: ''
+  });
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
   useEffect(() => {
     if (product?.variants) {
@@ -74,6 +84,41 @@ const ProductDetail: React.FC = () => {
     }
     setComment('');
     if (!user) setNickname('');
+  };
+
+  const handleAddReview = async () => {
+    if (!user) {
+      alert('Vui lòng đăng nhập để viết đánh giá.');
+      navigate('/auth');
+      return;
+    }
+
+    if (!newReview.content.trim()) {
+      alert('Vui lòng nhập nội dung đánh giá.');
+      return;
+    }
+
+    setIsSubmittingReview(true);
+    const reviewData = {
+      product_id: id!,
+      author: user.user_metadata?.full_name || user.email || 'Người dùng TechHub',
+      content: newReview.content,
+      rating: newReview.rating,
+      type: 'user' as const,
+      screenshotUrl: newReview.screenshotUrl.trim() || undefined
+    };
+
+    const added = await addReview(reviewData);
+    if (added) {
+      alert('Cảm ơn bạn đã gửi đánh giá!');
+      setShowReviewForm(false);
+      setNewReview({ rating: 5, content: '', screenshotUrl: '' });
+      // Refresh product to get new reviews
+      if (id) loadProduct(id);
+    } else {
+      alert('Có lỗi xảy ra khi gửi đánh giá. Vui lòng thử lại sau.');
+    }
+    setIsSubmittingReview(false);
   };
 
   const handleSaleAction = (type: 'request' | 'offer' | 'pass') => {
@@ -212,6 +257,64 @@ const ProductDetail: React.FC = () => {
                   Đánh giá người dùng
                 </button>
               </div>
+
+              {activeReviewTab === 'user' && (
+                <div className="user-review-actions mb-4">
+                  {!showReviewForm ? (
+                    <button className="btn btn-primary" onClick={() => setShowReviewForm(true)}>
+                      ✍️ Viết đánh giá của bạn
+                    </button>
+                  ) : (
+                    <div className="review-form-box glass-card p-4 mb-6">
+                      <h3>Viết đánh giá của bạn</h3>
+                      <div className="flex-column gap-3 mt-3">
+                        <div className="input-group">
+                          <label className="text-sm opacity-70">Điểm đánh giá (1-5 sao)</label>
+                          <div className="rating-selector flex-center gap-2 mt-1">
+                            {[1, 2, 3, 4, 5].map(star => (
+                              <button 
+                                key={star}
+                                className={`star-btn ${newReview.rating >= star ? 'active' : ''}`}
+                                onClick={() => setNewReview({ ...newReview, rating: star })}
+                                title={`${star} sao`}
+                              >
+                                ★
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="input-group">
+                          <textarea 
+                            className="premium-input min-h-100" 
+                            placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm này..."
+                            value={newReview.content}
+                            onChange={e => setNewReview({ ...newReview, content: e.target.value })}
+                          />
+                        </div>
+                        <div className="input-group">
+                          <input 
+                            type="text" 
+                            className="premium-input" 
+                            placeholder="Link ảnh bằng chứng (tùy chọn)..."
+                            value={newReview.screenshotUrl}
+                            onChange={e => setNewReview({ ...newReview, screenshotUrl: e.target.value })}
+                          />
+                        </div>
+                        <div className="flex-center gap-3 mt-2">
+                          <button className="btn btn-secondary flex-1" onClick={() => setShowReviewForm(false)}>Hủy</button>
+                          <button 
+                            className="btn btn-primary flex-1" 
+                            onClick={handleAddReview}
+                            disabled={isSubmittingReview || !newReview.content.trim()}
+                          >
+                            {isSubmittingReview ? 'Đang gửi...' : 'Gửi đánh giá'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div className="review-list-detailed">
                 {filteredReviews.length > 0 ? (
